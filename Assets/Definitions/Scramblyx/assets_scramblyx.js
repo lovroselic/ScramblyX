@@ -209,6 +209,7 @@ var Creation = [
     angles: [0]
   },
 ];
+
 var PATTERN = {
   create: function(which, img){
     var image = $("#" + img.id)[0];

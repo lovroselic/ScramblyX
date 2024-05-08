@@ -6,7 +6,7 @@
  
  */
 /////////////debug vars: remove all in production/////////////////////
-var DEBUG = {};
+const DEBUG = {};
 //DEBUG.CHEAT = true;
 //DEBUG.debug = true;
 //DEBUG.invincible = true;
@@ -16,34 +16,34 @@ DEBUG.lives = 5;
 //DEBUG.debug = false;
 ////////////////////////////////////////////////////
 
-var PRG = {
-    VERSION: "1.00",
+const PRG = {
+    VERSION: "1.01.01",
     NAME: "ScramblyX",
-    INIT: function () {
+    INIT() {
         console.clear();
         console.log(
-                PRG.NAME +
-                " " +
-                PRG.VERSION +
-                " by Lovro Selic, (c) C00lSch00l 2018 on " +
-                navigator.userAgent
-                );
+            PRG.NAME +
+            " " +
+            PRG.VERSION +
+            " by Lovro Selic, (c) LaughingSkull 2018 on " +
+            navigator.userAgent
+        );
         $("#title").html(PRG.NAME);
         $("#version").html(
-                PRG.NAME +
-                " V" +
-                PRG.VERSION +
-                " by Lovro Selič <span style='font-size:14px'>&copy</span> C00lSch00l 2018"
-                );
+            PRG.NAME +
+            " V" +
+            PRG.VERSION +
+            " by Lovro Selič <span style='font-size:14px'>&copy</span> LaughingSkull 2018"
+        );
         $("input#toggleAbout").val("About " + PRG.NAME);
         $("#about fieldset legend").append(" " + PRG.NAME + " ");
         $("#load").append(
-                "<canvas id ='preload_canvas' width='" +
-                ENGINE.LOAD_W +
-                "' height='" +
-                ENGINE.LOAD_H +
-                "'></canvas>"
-                );
+            "<canvas id ='preload_canvas' width='" +
+            ENGINE.LOAD_W +
+            "' height='" +
+            ENGINE.LOAD_H +
+            "'></canvas>"
+        );
         ENGINE.ctx = $("#preload_canvas")[0].getContext("2d");
         ENGINE.gameWIDTH = 1280;
         ENGINE.init();
@@ -65,15 +65,21 @@ var PRG = {
         $("#LEVEL").addClass("hidden");
         LAYER.level.canvas.width = INI.LEVEL_WIDTH;
     },
-    setup: function () {
+    setup() {
+        $("#engine_version").html(ENGINE.VERSION);
+        //$("#lib_version").html(LIB.VERSION);
+
         $("#toggleHelp").click(function () {
             $("#help").toggle(400);
         });
         $("#toggleAbout").click(function () {
             $("#about").toggle(400);
         });
+        $("#toggleVersion").click(function () {
+            $("#debug").toggle(400);
+        });
     },
-    start: function () {
+    start() {
         console.log(PRG.NAME + " started.");
         $("#startGame").addClass("hidden");
 
@@ -91,20 +97,20 @@ var PRG = {
 };
 
 ///////////////////////////////////////////////////////////////////
-var PLANE = {
-    firstInit: function () {
+const PLANE = {
+    firstInit() {
         PLANE.plane = "spitfire";
         PLANE.init();
         PLANE.ZERO = INI.GAME_HEIGHT - INI.ZERO - Math.floor(PLANE.sprite.height / 2);
         PLANE.TOP = INI.ZERO + 12;
         PLANE.position();
     },
-    position: function () {
+    position() {
         PLANE.y = PLANE.ZERO;
         PLANE.x = Math.floor(PLANE.sprite.width / 2) + INI.PLANE_LEFT;
         PLANE.angle = 0;
     },
-    init: function () {
+    init() {
         PLANE.sprite = SPRITE[PLANE.plane];
         PLANE.speed = 0;
         PLANE.airborne = false;
@@ -113,13 +119,13 @@ var PLANE = {
         PLANE.acceleration = false;
         PLANE.x = Math.floor(PLANE.sprite.width / 2) + INI.PLANE_LEFT;
     },
-    draw: function () {
+    draw() {
         if (PLANE.dead)
             return;
         PLANE.sprite = SPRITE[PLANE.plane + "_" + PLANE.angle];
         ENGINE.spriteDraw("plane", PLANE.x, PLANE.y, PLANE.sprite);
     },
-    move: function (smer) {
+    move(smer) {
         if (PLANE.landing)
             return;
         if (PLANE.speed < INI.MAX_SPEED && GAME.keymap[38])
@@ -145,14 +151,14 @@ var PLANE = {
         else if (PLANE.angle < 330 && PLANE.angle > 40)
             PLANE.angle = 330;
     },
-    lateral: function (smer) {
+    lateral(smer) {
         if (PLANE.landing)
             return;
         if (
-                PLANE.speed < INI.MAX_SPEED &&
-                !PLANE.acceleration &&
-                !GAME.levelComplete
-                ) {
+            PLANE.speed < INI.MAX_SPEED &&
+            !PLANE.acceleration &&
+            !GAME.levelComplete
+        ) {
             PLANE.acceleration = true;
             PLANE.speed = 1;
         }
@@ -164,7 +170,7 @@ var PLANE = {
         if (PLANE.x > INI.PLANE_RIGHT)
             PLANE.x = INI.PLANE_RIGHT;
     },
-    collisions: function () {
+    collisions() {
         if (PLANE.landed && GAME.x < GAME.airportLength - INI.MAX_SPEED)
             return;
         if (PLANE.dead)
@@ -182,7 +188,7 @@ var PLANE = {
             }
         }
     },
-    collisionBullet: function () {
+    collisionBullet() {
         if (PLANE.landed && GAME.x < GAME.airportLength - INI.MAX_SPEED)
             return;
         if (PLANE.dead)
@@ -194,13 +200,13 @@ var PLANE = {
         var HTB, blt;
         for (var q = LN - 1; q >= 0; q--) {
             blt = new ACTOR(
-                    "bullet",
-                    BULLETS.pool[q].x,
-                    BULLETS.pool[q].y,
-                    0,
-                    BULLETS.pool[q].prevX,
-                    BULLETS.pool[q].prevY
-                    );
+                "bullet",
+                BULLETS.pool[q].x,
+                BULLETS.pool[q].y,
+                0,
+                BULLETS.pool[q].prevX,
+                BULLETS.pool[q].prevY
+            );
             HTB = ENGINE.collision(blt, Plane);
             if (HTB) {
                 BULLETS.remove(q);
@@ -208,7 +214,7 @@ var PLANE = {
             }
         }
     },
-    die: function () {
+    die() {
         PLANE.dead = true;
         GAME.rewind = true;
         ENGINE.clearLayer("plane");
@@ -217,7 +223,7 @@ var PLANE = {
         if (GAME.lives <= 0)
             GAME.over();
     },
-    shoot: function () {
+    shoot() {
         if (PLANE.dead)
             return;
         if (!PLANE.airborne)
@@ -228,8 +234,8 @@ var PLANE = {
         var x = PLANE.x + Math.floor(PLANE.sprite.width / 2);
         var vx = Math.floor(INI.BULLET_SPEED * Math.cos(PLANE.angle * Math.PI / 180));
         var vy2 = Math.round(
-                INI.BULLET_SPEED * Math.sin(PLANE.angle * Math.PI / 180)
-                );
+            INI.BULLET_SPEED * Math.sin(PLANE.angle * Math.PI / 180)
+        );
         var vy1 = PLANE.getY(PLANE.angle);
         var vy = vy1 + vy2;
         var y = PLANE.y + vy;
@@ -239,7 +245,7 @@ var PLANE = {
             PLANE.bulletReady = true;
         }, INI.BULLET_TIMEOUT);
     },
-    getY: function (angle) {
+    getY(angle) {
         var smer;
         if (angle > 30) {
             smer = -1;
@@ -248,7 +254,7 @@ var PLANE = {
             smer = 1;
         return Math.floor(smer * (angle / 5));
     },
-    dropBomb: function () {
+    dropBomb() {
         if (PLANE.dead)
             return;
         if (!PLANE.airborne)
@@ -291,14 +297,14 @@ var BulletClass = function (x, y, vx, vy, angle) {
     this.prevY = null;
 };
 
-var BOMBS = {
+const BOMBS = {
     pool: [],
-    move: function () {
+    move() {
         var LN = BOMBS.pool.length;
         var angle, calcAngle;
         for (var q = LN - 1; q >= 0; q--) {
             calcAngle =
-                    90 - Math.atan(BOMBS.pool[q].vx / BOMBS.pool[q].vy) * 180 / Math.PI;
+                90 - Math.atan(BOMBS.pool[q].vx / BOMBS.pool[q].vy) * 180 / Math.PI;
             calcAngle = Math.round(calcAngle / 5) * 5;
             if (calcAngle > BOMBS.pool[q].angle)
                 BOMBS.pool[q].angle += 5;
@@ -321,48 +327,48 @@ var BOMBS = {
             }
         }
     },
-    remove: function (x) {
+    remove(x) {
         BOMBS.pool.splice(x, 1);
         return;
     },
-    draw: function () {
+    draw() {
         var LN = BOMBS.pool.length;
         var spriteName;
         for (var q = LN - 1; q >= 0; q--) {
             spriteName = "bomb_" + BOMBS.pool[q].angle;
             ENGINE.spriteDraw(
-                    "bullets",
-                    BOMBS.pool[q].x,
-                    BOMBS.pool[q].y,
-                    SPRITE[spriteName]
-                    );
+                "bullets",
+                BOMBS.pool[q].x,
+                BOMBS.pool[q].y,
+                SPRITE[spriteName]
+            );
         }
     },
-    collisionToBackground: function () {
+    collisionToBackground() {
         var LN = BOMBS.pool.length;
         if (LN === 0)
             return;
         var HTB;
         for (var q = LN - 1; q >= 0; q--) {
             var bomb = new ACTOR(
-                    "bomb",
-                    BOMBS.pool[q].x,
-                    BOMBS.pool[q].y,
-                    BOMBS.pool[q].angle
-                    );
+                "bomb",
+                BOMBS.pool[q].x,
+                BOMBS.pool[q].y,
+                BOMBS.pool[q].angle
+            );
             HTB = ENGINE.collisionToBackground(bomb, LAYER.world);
             if (HTB) {
                 EXPLOSIONS.pool.push(
-                        new AnimationSPRITE(BOMBS.pool[q].x, BOMBS.pool[q].y, "AstExp", 12)
-                        );
+                    new AnimationSPRITE(BOMBS.pool[q].x, BOMBS.pool[q].y, "AstExp", 12)
+                );
                 BOMBS.remove(q);
             }
         }
     }
 };
-var BULLETS = {
+const BULLETS = {
     pool: [],
-    move: function () {
+    move() {
         var LN = BULLETS.pool.length;
         if (LN === 0)
             return;
@@ -386,50 +392,50 @@ var BULLETS = {
             }
         }
     },
-    remove: function (x) {
+    remove(x) {
         BULLETS.pool.splice(x, 1);
         return;
     },
-    collisionToBackground: function () {
+    collisionToBackground() {
         var LN = BULLETS.pool.length;
         if (LN === 0)
             return;
         var HTB;
         for (var q = LN - 1; q >= 0; q--) {
             var blt = new ACTOR(
-                    "bullet",
-                    BULLETS.pool[q].x,
-                    BULLETS.pool[q].y,
-                    0,
-                    BULLETS.pool[q].prevX,
-                    BULLETS.pool[q].prevY
-                    );
+                "bullet",
+                BULLETS.pool[q].x,
+                BULLETS.pool[q].y,
+                0,
+                BULLETS.pool[q].prevX,
+                BULLETS.pool[q].prevY
+            );
             HTB = ENGINE.collisionToBackground(blt, LAYER.world);
             if (HTB) {
                 BULLETS.remove(q);
             }
         }
     },
-    draw: function () {
+    draw() {
         var LN = BULLETS.pool.length;
         for (var q = LN - 1; q >= 0; q--) {
             ENGINE.spriteDraw(
-                    "bullets",
-                    BULLETS.pool[q].x,
-                    BULLETS.pool[q].y,
-                    SPRITE.bullet
-                    );
+                "bullets",
+                BULLETS.pool[q].x,
+                BULLETS.pool[q].y,
+                SPRITE.bullet
+            );
         }
     }
 };
 
-var BACKGROUND = {
-    black: function () {
+const BACKGROUND = {
+    black() {
         var CTX = LAYER.background;
         CTX.fillStyle = "#000";
         CTX.fillRect(0, 0, ENGINE.gameWIDTH, INI.GAME_HEIGHT);
     },
-    sky: function () {
+    sky() {
         var CTX = LAYER.background;
         var grad = CTX.createLinearGradient(0, 0, 0, INI.GAME_HEIGHT);
         grad.addColorStop("0", "#C7E7FB");
@@ -470,20 +476,20 @@ var ACTOR = function (sprite_class, x, y, angle, prevX, prevY) {
 };
 
 var ENEMY_ACTOR = function (
-        sprite_class,
-        x,
-        y,
-        angle,
-        realX,
-        realY,
-        type,
-        score,
-        speed,
-        shootSpeed,
-        realLives,
-        prevX,
-        prevY
-        ) {
+    sprite_class,
+    x,
+    y,
+    angle,
+    realX,
+    realY,
+    type,
+    score,
+    speed,
+    shootSpeed,
+    realLives,
+    prevX,
+    prevY
+) {
     this.actor = new ACTOR(sprite_class, x, y, angle, prevX, prevY);
     this.realX = realX;
     this.realY = realY;
@@ -514,8 +520,8 @@ var ENEMY_ACTOR = function (
     }
 };
 
-var ENEMY = {
-    shoot: function () {
+const ENEMY = {
+    shoot() {
         if (PLANE.dead)
             return;
         var EPL = ENEMY.active.length;
@@ -527,17 +533,17 @@ var ENEMY = {
                     var x, y, vx, vy;
                     if (ENEMY.active[q].type === "plane") {
                         x =
-                                ENEMY.active[q].actor.x -
-                                Math.floor(ENEMY.active[q].actor.width / 2) -
-                                1;
+                            ENEMY.active[q].actor.x -
+                            Math.floor(ENEMY.active[q].actor.width / 2) -
+                            1;
                         vx =
-                                Math.floor(
-                                        INI.BULLET_SPEED * Math.cos(ENEMY.active[q].actor.angle * Math.PI / 180)
-                                        ) * -1;
+                            Math.floor(
+                                INI.BULLET_SPEED * Math.cos(ENEMY.active[q].actor.angle * Math.PI / 180)
+                            ) * -1;
                         vy =
-                                Math.floor(
-                                        INI.BULLET_SPEED * Math.sin(ENEMY.active[q].actor.angle * Math.PI / 180)
-                                        ) * -1;
+                            Math.floor(
+                                INI.BULLET_SPEED * Math.sin(ENEMY.active[q].actor.angle * Math.PI / 180)
+                            ) * -1;
                         y = ENEMY.active[q].actor.y + vy;
                     } else if (ENEMY.active[q].type === "ship") {
                         x = ENEMY.active[q].actor.x - Math.round(ENEMY.active[q].actor.width / 3);
@@ -549,9 +555,9 @@ var ENEMY = {
                     BULLETS.pool.push(new BulletClass(x, y, vx, vy, 0));
                     ENEMY.active[q].canShoot = false;
                     setTimeout(
-                            coolOff.bind(null, ENEMY.active[q]),
-                            ENEMY.active[q].shootSpeed
-                            );
+                        coolOff.bind(null, ENEMY.active[q]),
+                        ENEMY.active[q].shootSpeed
+                    );
                 }
             }
         }
@@ -560,7 +566,7 @@ var ENEMY = {
             EA.canShoot = true;
         }
     },
-    init: function () {
+    init() {
         ENEMY.refreshIndex = 0;
         var EPL = ENEMY.pool.length;
         for (var q = 0; q < EPL; q++) {
@@ -572,39 +578,39 @@ var ENEMY = {
     pool: [],
     active: [],
     refreshIndex: 0,
-    refresh: function () {
+    refresh() {
         var EPL = ENEMY.pool.length;
         var distance;
         while (ENEMY.refreshIndex < EPL) {
             distance =
-                    GAME.x +
-                    ENGINE.gameWIDTH +
-                    Math.floor(ENEMY.pool[ENEMY.refreshIndex].actor.width / 2) +
-                    1;
+                GAME.x +
+                ENGINE.gameWIDTH +
+                Math.floor(ENEMY.pool[ENEMY.refreshIndex].actor.width / 2) +
+                1;
             if (distance >= ENEMY.pool[ENEMY.refreshIndex].realX) {
                 ENEMY.pool[ENEMY.refreshIndex].actor.x =
-                        ENEMY.pool[ENEMY.refreshIndex].realX - GAME.x;
+                    ENEMY.pool[ENEMY.refreshIndex].realX - GAME.x;
                 ENEMY.active.push(ENEMY.pool[ENEMY.refreshIndex]);
                 ENEMY.refreshIndex++;
             } else
                 break;
         }
     },
-    draw: function () {
+    draw() {
         var EAL = ENEMY.active.length;
         if (EAL === 0)
             return;
         for (var q = 0; q < EAL; q++) {
             ENEMY.active[q].actor.refresh();
             ENGINE.spriteDraw(
-                    "plane",
-                    ENEMY.active[q].actor.x,
-                    ENEMY.active[q].actor.y,
-                    SPRITE[ENEMY.active[q].actor.name]
-                    );
+                "plane",
+                ENEMY.active[q].actor.x,
+                ENEMY.active[q].actor.y,
+                SPRITE[ENEMY.active[q].actor.name]
+            );
         }
     },
-    move: function () {
+    move() {
         var EAL = ENEMY.active.length;
         if (EAL === 0)
             return;
@@ -617,9 +623,9 @@ var ENEMY = {
                 ENEMY.active[q].actor.x -= PLANE.speed;
             }
             if (
-                    ENEMY.active[q].actor.x + Math.floor(ENEMY.active[q].actor.width / 2) + 1 <
-                    0
-                    ) {
+                ENEMY.active[q].actor.x + Math.floor(ENEMY.active[q].actor.width / 2) + 1 <
+                0
+            ) {
                 ENEMY.remove(q);
                 continue;
             }
@@ -658,23 +664,23 @@ var ENEMY = {
             }
         }
     },
-    remove: function (q) {
+    remove(q) {
         ENEMY.active.splice(q, 1);
         return;
     },
-    die: function (q) {
+    die(q) {
         ENGINE.clearLayer("plane");
         EXPLOSIONS.pool.push(
-                new AnimationSPRITE(
-                        ENEMY.active[q].actor.x,
-                        ENEMY.active[q].actor.y,
-                        "AlienExp",
-                        6
-                        )
-                );
+            new AnimationSPRITE(
+                ENEMY.active[q].actor.x,
+                ENEMY.active[q].actor.y,
+                "AlienExp",
+                6
+            )
+        );
         ENEMY.remove(q);
     },
-    collisionBomb: function () {
+    collisionBomb() {
         var LN = BOMBS.pool.length;
         if (LN === 0)
             return;
@@ -690,8 +696,8 @@ var ENEMY = {
                 HTB = ENGINE.collision(ENEMY.active[w].actor, blt);
                 if (HTB) {
                     EXPLOSIONS.pool.push(
-                            new AnimationSPRITE(BOMBS.pool[q].x, BOMBS.pool[q].y, "AstExp", 12)
-                            );
+                        new AnimationSPRITE(BOMBS.pool[q].x, BOMBS.pool[q].y, "AstExp", 12)
+                    );
                     BOMBS.remove(q);
                     GAME.bombsHit++;
                     ENEMY.active[w].lives -= 5;
@@ -704,7 +710,7 @@ var ENEMY = {
             }
         }
     },
-    collisionBullet: function () {
+    collisionBullet() {
         var LN = BULLETS.pool.length;
         if (LN === 0)
             return;
@@ -715,13 +721,13 @@ var ENEMY = {
         var HTB, blt;
         for (var q = LN - 1; q >= 0; q--) {
             blt = new ACTOR(
-                    "bullet",
-                    BULLETS.pool[q].x,
-                    BULLETS.pool[q].y,
-                    0,
-                    BULLETS.pool[q].prevX,
-                    BULLETS.pool[q].prevY
-                    );
+                "bullet",
+                BULLETS.pool[q].x,
+                BULLETS.pool[q].y,
+                0,
+                BULLETS.pool[q].prevX,
+                BULLETS.pool[q].prevY
+            );
             ENL = ENEMY.active.length;
             for (var w = ENL - 1; w >= 0; w--) {
                 HTB = ENGINE.collision(ENEMY.active[w].actor, blt);
@@ -738,7 +744,7 @@ var ENEMY = {
             }
         }
     },
-    collisionPlane: function () {
+    collisionPlane() {
         if (PLANE.dead)
             return;
         var ENL = ENEMY.active.length;
@@ -759,7 +765,7 @@ var ENEMY = {
             }
         }
     },
-    collisionBackground: function () {
+    collisionBackground() {
         var ENL = ENEMY.active.length;
         if (ENL === 0)
             return;
@@ -775,9 +781,9 @@ var ENEMY = {
     }
 };
 
-var EXPLOSIONS = {
+const EXPLOSIONS = {
     pool: [],
-    draw: function () {
+    draw() {
         ENGINE.clearLayer("explosion");
         var PL = EXPLOSIONS.pool.length;
         if (PL === 0)
@@ -785,11 +791,11 @@ var EXPLOSIONS = {
         for (var instance = PL - 1; instance >= 0; instance--) {
             var sprite = EXPLOSIONS.pool[instance].pool.shift();
             ENGINE.spriteDraw(
-                    "explosion",
-                    EXPLOSIONS.pool[instance].x,
-                    EXPLOSIONS.pool[instance].y,
-                    SPRITE[sprite]
-                    );
+                "explosion",
+                EXPLOSIONS.pool[instance].x,
+                EXPLOSIONS.pool[instance].y,
+                SPRITE[sprite]
+            );
             EXPLOSIONS.pool[instance].x -= PLANE.speed;
             if (EXPLOSIONS.pool[instance].pool.length === 0) {
                 EXPLOSIONS.pool.splice(instance, 1);
@@ -798,7 +804,7 @@ var EXPLOSIONS = {
     }
 };
 
-var GAME = {
+const GAME = {
     keymap: {
         17: false,
         37: false,
@@ -809,14 +815,14 @@ var GAME = {
         13: false,
         120: false
     },
-    setDrawLevel: function (level) {
+    setDrawLevel(level) {
         var drawLevel = level % INI.LAST_LEVEL;
         if (drawLevel === 0)
             drawLevel = INI.LAST_LEVEL;
         GAME.drawLevel = drawLevel;
         return;
     },
-    start: function () {
+    start() {
         $("#bottom")[0].scrollIntoView();
         $(document).keydown(GAME.checkKey);
         $(document).keyup(GAME.clearKey);
@@ -843,26 +849,26 @@ var GAME = {
         GAME.firstFrameDraw();
         GAME.run();
     },
-    stop: function () {
+    stop() {
         GAME.stopAnimation = true;
         $(document).off("keyup", GAME.clearKey);
         $(document).off("keydown", GAME.checkKey);
         GAME.end();
     },
-    over: function () {
+    over() {
         console.log("GAME OVER");
         ENGINE.clearLayer("text");
         TITLE.gameOver();
         GAME.ended = true;
     },
-    end: function () {
+    end() {
         TITLE.render();
         SCORE.checkScore(GAME.score);
         SCORE.hiScore();
         TEXT.score();
         $("#startGame").removeClass("hidden");
     },
-    move: function () {
+    move() {
         if (PLANE.landing) {
             PLANE.speed -= 0.1;
             if (!PLANE.clearForlanding) {
@@ -909,9 +915,9 @@ var GAME = {
             //console.log("Stopped animation at ", GAME.x);
         }
         if (
-                PLANE.x + GAME.x >= LEVELS[GAME.drawLevel].airport.x1 &&
-                PLANE.x + GAME.x <= LEVELS[GAME.drawLevel].airport.x2
-                ) {
+            PLANE.x + GAME.x >= LEVELS[GAME.drawLevel].airport.x1 &&
+            PLANE.x + GAME.x <= LEVELS[GAME.drawLevel].airport.x2
+        ) {
             PLANE.clearForlanding = true;
         } else
             PLANE.clearForlanding = false;
@@ -929,7 +935,7 @@ var GAME = {
         if (PLANE.speed === INI.MAX_SPEED && !PLANE.dead)
             GAME.score += 1;
     },
-    run: function () {
+    run() {
         if (!GAME.frame.start)
             GAME.frame.start = Date.now();
         var current = Date.now();
@@ -939,17 +945,14 @@ var GAME = {
             ENEMY.refresh();
             GAME.move();
             ENEMY.move();
-            if (!DEBUG.invincible)
-                ENEMY.shoot();
+            if (!DEBUG.invincible) ENEMY.shoot();
             BULLETS.move();
             BOMBS.move();
             PLANE.collisions();
-            if (!DEBUG.invincible)
-                PLANE.collisionBullet();
+            if (!DEBUG.invincible) PLANE.collisionBullet();
             ENEMY.collisionBullet();
             ENEMY.collisionBomb();
-            if (!DEBUG.invincible)
-                ENEMY.collisionPlane();
+            if (!DEBUG.invincible) ENEMY.collisionPlane();
             ENEMY.collisionBackground();
             BULLETS.collisionToBackground();
             BOMBS.collisionToBackground();
@@ -961,14 +964,14 @@ var GAME = {
         } else
             requestAnimationFrame(GAME.run);
     },
-    firstFrameDraw: function () {
+    firstFrameDraw() {
         TITLE.render();
         BACKGROUND.sky();
         PLANE.draw();
         LEVEL.paintVisible();
         TEXT.score();
     },
-    frameDraw: function () {
+    frameDraw() {
         LEVEL.paintVisible();
         EXPLOSIONS.draw();
         ENGINE.clearLayer("plane");
@@ -979,7 +982,7 @@ var GAME = {
         BOMBS.draw();
         TEXT.score();
     },
-    endLevel: function () {
+    endLevel() {
         console.log("Level ", GAME.level, " complete.");
         GAME.levelComplete = true;
         var y = 300;
@@ -998,7 +1001,7 @@ var GAME = {
         y += 2 * fs;
         TITLE.centeredText("Press 'ENTER' to continue.", fs, y);
     },
-    nextLevel: function () {
+    nextLevel() {
         GAME.level++;
         GAME.setDrawLevel(GAME.level);
         ENGINE.clearLayer("text");
@@ -1006,7 +1009,7 @@ var GAME = {
         GAME.initLevel(GAME.level);
         PLANE.init();
     },
-    initLevel: function (level) {
+    initLevel(level) {
         GAME.levelComplete = false;
         GAME.shotsFired = 0;
         GAME.shotsHit = 0;
@@ -1025,7 +1028,7 @@ var GAME = {
             ENGINE.clearLayer("text");
         }, 5000);
     },
-    respond: function () {
+    respond() {
         var map = GAME.keymap;
         if (map[120]) {
             console.log("GAME.x:", GAME.x);
@@ -1055,13 +1058,13 @@ var GAME = {
         }
         return;
     },
-    clearKey: function (e) {
+    clearKey(e) {
         e = e || window.event;
         if (e.keyCode in GAME.keymap) {
             GAME.keymap[e.keyCode] = false;
         }
     },
-    checkKey: function (e) {
+    checkKey(e) {
         e = e || window.event;
         if (e.keyCode in GAME.keymap) {
             GAME.keymap[e.keyCode] = true;
@@ -1070,12 +1073,12 @@ var GAME = {
     }
 };
 
-var TEXT = {
-    clearSign: function (x, y, w, h) {
+const TEXT = {
+    clearSign(x, y, w, h) {
         var CTX = LAYER.sign;
         CTX.clearRect(x, y, w, h);
     },
-    score: function () {
+    score() {
         var EL = GAME.extraLife[0];
         if (GAME.score >= EL) {
             GAME.lives++;
@@ -1110,22 +1113,22 @@ var TEXT = {
         CTX.fillText("HISCORE: " + SCORE.SCORE.value[0] + " by " + HS, x, y);
     }
 };
-var TITLE = {
-    render: function () {
+const TITLE = {
+    render() {
         TITLE.background();
         TITLE.title();
     },
-    bigText: function (text, fs) {
+    bigText(text, fs) {
         var x = ENGINE.gameWIDTH / 2;
         var y = INI.GAME_HEIGHT / 2;
         TITLE.text(text, fs, x, y);
         return y;
     },
-    centeredText: function (text, fs, y) {
+    centeredText(text, fs, y) {
         var x = ENGINE.gameWIDTH / 2;
         TITLE.text(text, fs, x, y);
     },
-    text: function (text, fs, x, y) {
+    text(text, fs, x, y) {
         var CTX = LAYER.text;
         CTX.fillStyle = "#FFF";
         CTX.font = fs + "px Consolas";
@@ -1137,10 +1140,10 @@ var TITLE = {
         CTX.textAlign = "center";
         CTX.fillText(text, x, y);
     },
-    gameOver: function () {
+    gameOver() {
         TITLE.bigText("GAME OVER", 120);
     },
-    title: function () {
+    title() {
         var CTX = LAYER.title;
         var grad = CTX.createLinearGradient(8, 100, 128, 128);
         grad.addColorStop("0", "#ff0000");
@@ -1172,25 +1175,25 @@ var TITLE = {
         y = 48;
         x = 1100;
         CTX.font = "14px Consolas";
-        CTX.fillText(String.fromCharCode(169) + " C00lSch00l 2018", x, y);
+        CTX.fillText(String.fromCharCode(169) + " LaughingSkull 2018", x, y);
     },
-    background: function () {
+    background() {
         var CTX = LAYER.title;
         CTX.fillStyle = "#000";
         CTX.roundRect(
-                0,
-                0,
-                ENGINE.gameWIDTH,
-                INI.TITLE_HEIGHT,
-                {
-                    upperLeft: 10,
-                    upperRight: 10,
-                    lowerLeft: 10,
-                    lowerRight: 10
-                },
-                true,
-                true
-                );
+            0,
+            0,
+            ENGINE.gameWIDTH,
+            INI.TITLE_HEIGHT,
+            {
+                upperLeft: 10,
+                upperRight: 10,
+                lowerLeft: 10,
+                lowerRight: 10
+            },
+            true,
+            true
+        );
     }
 };
 
