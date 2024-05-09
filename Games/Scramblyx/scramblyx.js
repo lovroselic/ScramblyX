@@ -6,68 +6,88 @@
  
  */
 /////////////debug vars: remove all in production/////////////////////
-const DEBUG = {};
-//DEBUG.CHEAT = true;
-//DEBUG.debug = true;
-//DEBUG.invincible = true;
-DEBUG.invincible = false;
-DEBUG.LEVEL = 5;
-DEBUG.lives = 5;
-//DEBUG.debug = false;
+const DEBUG = {
+    CHEAT: false,
+    debug: true,
+    invincible: false,
+    LEVEL: 5,
+    lives: 5
+};
+
 ////////////////////////////////////////////////////
 
-const PRG = {
-    VERSION: "1.01.01",
-    NAME: "ScramblyX",
-    INIT() {
-        console.clear();
-        console.log(
-            PRG.NAME +
-            " " +
-            PRG.VERSION +
-            " by Lovro Selic, (c) LaughingSkull 2018 on " +
-            navigator.userAgent
-        );
-        $("#title").html(PRG.NAME);
-        $("#version").html(
-            PRG.NAME +
-            " V" +
-            PRG.VERSION +
-            " by Lovro Selič <span style='font-size:14px'>&copy</span> LaughingSkull 2018"
-        );
-        $("input#toggleAbout").val("About " + PRG.NAME);
-        $("#about fieldset legend").append(" " + PRG.NAME + " ");
-        $("#load").append(
-            "<canvas id ='preload_canvas' width='" +
-            ENGINE.LOAD_W +
-            "' height='" +
-            ENGINE.LOAD_H +
-            "'></canvas>"
-        );
-        ENGINE.ctx = $("#preload_canvas")[0].getContext("2d");
-        ENGINE.gameWIDTH = 1280;
-        ENGINE.init();
-        ENGINE.checkIntersection = true;
-        $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
-        ENGINE.addBOX("LEVEL", INI.GAME_HEIGHT, 1, ["level"]);
-        ENGINE.addBOX("TITLE", INI.TITLE_HEIGHT, 1, ["title"]);
-        ENGINE.addBOX("ROOM", INI.GAME_HEIGHT, 8, [
-            "background",
-            "world",
-            "plane",
-            "bullets",
-            "explosion",
-            "text",
-            "sign",
-            "debug"
-        ]);
+const CONST = {
+    SPACE: "\u0020",
+    NBS: "&nbsp",
+    NEWLINE: "\n"
+};
 
-        $("#LEVEL").addClass("hidden");
-        LAYER.level.canvas.width = INI.LEVEL_WIDTH;
+const INI = {
+    sprite_maxW: 300,
+    sprite_maxH: 50,
+    COLLISION_SAFE: 264,
+    TITLE_HEIGHT: 72,
+    GAME_HEIGHT: 768,
+    ANIMATION_INTERVAL: 17,
+    PISTE_HEIGHT: 8,
+    ZERO: 24,
+    TOP: 680,
+    MOVE: 8,
+    PLANE_LEFT: 40,
+    PLANE_RIGHT: 600,
+    MAX_SPEED: 8,
+    REWIND_MAX: -96,
+    TREE_PADDING: 12,
+    LAKE_PADDING: 10,
+    TREE_CORRECTION: 12,
+    BULLET_SPEED: 24,
+    BULLET_TIMEOUT: 180,
+    BOMB_TIMEOUT: 680,
+    BOMB_GRAVITY_SPEED: 12,
+    ENEMY_PLANES: 11,
+    ENEMY_TANKS: 6,
+    ENEMY_SHIPS: 4,
+    PLANE_SCORE: 1000,
+    TANK_SCORE: 500,
+    SHIP_SCORE: 750,
+    PLANE_SPEED: 13,
+    ZEPPELIN_SPEED: 9,
+    PLANE_SHOOT: 1200,
+    SHIP_SHOOT: 1600,
+    SHIP_RANDOM: 300,
+    LEVEL_BONUS: 100000,
+    LAST_LEVEL: 5
+};
+
+
+const PRG = {
+    VERSION: "1.01.02",
+    NAME: "ScramblyX",
+    YEAR: "2018",
+    CSS: "color: #239AFF;",
+    INIT() {
+        console.log("%c***********************************************************************************************************************************************", PRG.CSS);
+        console.log(`${PRG.NAME} ${PRG.VERSION} by Lovro Selic, (c) LaughingSkull ${PRG.YEAR} on ${navigator.userAgent}`);
+        console.log("%c***********************************************************************************************************************************************", PRG.CSS);
+        $("#title").html(PRG.NAME);
+        $("#version").html(`${PRG.NAME} V${PRG.VERSION} <span style='font-size:14px'>&copy</span> LaughingSkull ${PRG.YEAR}`);
+        $("input#toggleAbout").val(`About  ${PRG.NAME}`);
+        $("#about fieldset legend").append(` ${PRG.NAME} `);
+
+
+        ENGINE.autostart = true;
+        ENGINE.start = PRG.start;
+        ENGINE.readyCall = GAME.setup;
+        //ENGINE.setGridSize(64);
+        //ENGINE.setSpriteSheetSize(64);
+        ENGINE.init();
+
+        /*** HERE */
+
     },
     setup() {
         $("#engine_version").html(ENGINE.VERSION);
-        //$("#lib_version").html(LIB.VERSION);
+        $("#lib_version").html(LIB.VERSION);
 
         $("#toggleHelp").click(function () {
             $("#help").toggle(400);
@@ -78,7 +98,19 @@ const PRG = {
         $("#toggleVersion").click(function () {
             $("#debug").toggle(400);
         });
+
+        ENGINE.gameWIDTH = 1280;
+        ENGINE.checkIntersection = true;
+        $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
+        ENGINE.addBOX("LEVEL", INI.GAME_HEIGHT, 1, ["level"]);
+        ENGINE.addBOX("TITLE", INI.TITLE_HEIGHT, 1, ["title"]);
+        ENGINE.addBOX("ROOM", INI.GAME_HEIGHT, 8, ["background", "world", "plane", "bullets", "explosion", "text", "sign", "debug"]);
+
+        $("#LEVEL").addClass("hidden");
+        LAYER.level.canvas.width = INI.LEVEL_WIDTH;
+
     },
+
     start() {
         console.log(PRG.NAME + " started.");
         $("#startGame").addClass("hidden");
@@ -89,10 +121,11 @@ const PRG = {
             }
         });
 
-        PATTERN.create("grass", Grass);
-        PATTERN.create("sea", Sea);
-        PATTERN.create("sand", Sand);
-        GAME.start();
+        //PATTERN.create("grass", Grass);
+        //PATTERN.create("sea", Sea);
+        //PATTERN.create("sand", Sand);
+        TITLE.startTitle();
+        //GAME.start();
     }
 };
 
@@ -448,6 +481,7 @@ const BACKGROUND = {
     }
 };
 
+/*
 var AnimationSPRITE = function (x, y, type, howmany) {
     this.x = x;
     this.y = y;
@@ -456,6 +490,9 @@ var AnimationSPRITE = function (x, y, type, howmany) {
         this.pool.push(type + i);
     }
 };
+*/
+
+/*
 var ACTOR = function (sprite_class, x, y, angle, prevX, prevY) {
     this.class = sprite_class;
     this.x = x || 0;
@@ -474,7 +511,9 @@ var ACTOR = function (sprite_class, x, y, angle, prevX, prevY) {
     };
     this.refresh();
 };
+*/
 
+/*
 var ENEMY_ACTOR = function (
     sprite_class,
     x,
@@ -519,6 +558,7 @@ var ENEMY_ACTOR = function (
         this.canShoot = false;
     }
 };
+*/
 
 const ENEMY = {
     shoot() {
@@ -781,7 +821,7 @@ const ENEMY = {
     }
 };
 
-const EXPLOSIONS = {
+/*const EXPLOSIONS = {
     pool: [],
     draw() {
         ENGINE.clearLayer("explosion");
@@ -802,10 +842,10 @@ const EXPLOSIONS = {
             }
         }
     }
-};
+};*/
 
 const GAME = {
-    keymap: {
+    /*keymap: {
         17: false,
         37: false,
         38: false,
@@ -814,6 +854,9 @@ const GAME = {
         32: false,
         13: false,
         120: false
+    },*/
+    setup() {
+        console.info("GAME SETUP");
     },
     setDrawLevel(level) {
         var drawLevel = level % INI.LAST_LEVEL;
@@ -1114,6 +1157,9 @@ const TEXT = {
     }
 };
 const TITLE = {
+    startTitle() {
+        console.log("Start title");
+    },
     render() {
         TITLE.background();
         TITLE.title();
@@ -1180,27 +1226,16 @@ const TITLE = {
     background() {
         var CTX = LAYER.title;
         CTX.fillStyle = "#000";
-        CTX.roundRect(
-            0,
-            0,
-            ENGINE.gameWIDTH,
-            INI.TITLE_HEIGHT,
-            {
-                upperLeft: 10,
-                upperRight: 10,
-                lowerLeft: 10,
-                lowerRight: 10
-            },
-            true,
-            true
-        );
+        CTX.roundRect(0, 0, ENGINE.gameWIDTH, INI.TITLE_HEIGHT, { upperLeft: 10, upperRight: 10, lowerLeft: 10, lowerRight: 10 }, true, true);
     }
 };
 
-$(document).ready(function () {
+// -- main --
+$(function () {
+    SPEECH.init();
     PRG.INIT();
     PRG.setup();
-    ENGINE.preLoadImages();
+    ENGINE.LOAD.preload();
     SCORE.init("SC", "ScramblyX", 10, 10000);
     SCORE.extraLife = [50000, 100000, 200000, 500000, 1000000, 10000000];
     SCORE.loadHS();

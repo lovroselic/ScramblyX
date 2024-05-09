@@ -1,5 +1,9 @@
 /* assets for ScramblyX */
+console.log("Assets for INVASION starting .....");
 
+
+
+/*
 var Grass = new Tile("grass1", 128, 128, "png", "grass");
 var Sea = new Tile("sea", 128, 102, "png", "sea");
 var Sand = new Tile("sand", 100, 100, "png", "sand");
@@ -67,7 +71,10 @@ var Palm2 = new Tile("palm2", 38, 48, "png", "palm2");
 var Palm3 = new Tile("palm3", 43, 48, "png", "palm3");
 var Palm4 = new Tile("palm4", 48, 48, "png", "palm4");
 var Palm5 = new Tile("palm5", 35, 48, "png", "palm5");
+*/
 
+
+/*
 var World = {
   sprite: [Bullet, Spitfire, Grass, Bomb, Sea, Sand],
   tree: [Tree1, Tree2, Tree3, Tree4, Tree5, Tree6, Tree7, Tree8],
@@ -105,6 +112,9 @@ var World = {
     AstExp12
   ]
 };
+*/
+
+/*
 
 var Creation = [
   {
@@ -210,10 +220,13 @@ var Creation = [
   },
 ];
 
-var PATTERN = {
+*/
+/*var PATTERN = {
   create: function(which, img){
     var image = $("#" + img.id)[0];
     var CTX = LAYER.world;
     PATTERN[which] = CTX.createPattern(image, "repeat");
   }
-}
+}*/
+
+console.log("Assets for INVASION ready.");

@@ -57,11 +57,11 @@
                     <legend>
                         Instructions:
                     </legend>
-                    <p>Cursor UP/DOWN: tilt plane angle to ascend/descend.</p>
-                    <p>Cursor RIGHT: start plane's engine. </p>
-                    <p>Cursor LEFT/RIGHT adjust plane's position/relative speed on screen.</p>
-                    <p>CTRL: fire cannon. </p>
-                    <p>SPACE: drop bombs</p>
+                    <p>Cursor <kbd>UP/DOWN</kbd>: tilt plane angle to ascend/descend.</p>
+                    <p>Cursor <kbd>RIGHT</kbd>: start plane's engine. </p>
+                    <p>Cursor <kbd>LEFT/RIGHT</kbd> adjust plane's position/relative speed on screen.</p>
+                    <p><kbd>CTRL</kbd>: fire cannon. </p>
+                    <p><kbd>SPACE</kbd>: drop bombs</p>
                     <p>Land on the airport at the end of the level. Don't use too steep angle or the plane will crash.
                     </p>
 
@@ -73,15 +73,36 @@
                     <legend>
                         About:
                     </legend>
-                    <img src="https://www.arcade-museum.com/images/118/1181242158130.png" alt="Scramble"
-                        class="border border-dark p-1 m-2 float-start" title="Scramble" width='100'>
-                    <p>ScramblyX is roughly inspired by legendary 80' games such as (of course) <a
-                            href="https://en.wikipedia.org/wiki/Scramble_(video_game)" target="_blank">Scramble</a>, <a
-                            href="https://en.wikipedia.org/wiki/Blue_Max_(video_game)" target="_blank">Blue Max</a> and
-                        <a href="https://en.wikipedia.org/wiki/Fort_Apocalypse" target="_blank">Fort Apocalypse</a>.
-                    </p>
-                    <p>Source of graphics are various free resource sites. No copyrighted images were intendedly used in
-                        the making of the game. Code is written in JavaScript using JQuery framework.</p>
+
+                    <div class="container">
+                        <div class='row '>
+                            <div class="col-12 col-lg-3 my-2 d-flex align-items-center justify-content-center">
+                                <image src="/Images/Scramble.webp" alt="Scramble"
+                                    class="img-fluid  border-dark rounded-2" title="Scramblyx is inspired by Scramble">
+                                </image>
+                            </div>
+                            <div class="col-12 col-lg-6 my-2">
+                                <p>ScramblyX is roughly inspired by legendary 80' games such as (of course) <a
+                                        href="https://en.wikipedia.org/wiki/Scramble_(video_game)"
+                                        target="_blank">Scramble</a>, <a
+                                        href="https://en.wikipedia.org/wiki/Blue_Max_(video_game)" target="_blank">Blue
+                                        Max</a> and
+                                    <a href="https://en.wikipedia.org/wiki/Fort_Apocalypse" target="_blank">Fort
+                                        Apocalypse</a>.
+                                </p>
+                                <p>Source of graphics are various free resource sites. No copyrighted images were
+                                    intendedly
+                                    used in
+                                    the making of the game. Code is written in JavaScript using JQuery framework.</p>
+                            </div>
+                            <div class="col-12 col-lg-3 my-2 d-flex align-items-center justify-content-center">
+                                <image src="/Images/BlueMax.webp" alt="Blue Max"
+                                    class="img-fluid  border-dark rounded-2" title="Scramblyx is inspired by Blue Max">
+                                </image>
+                            </div>
+                        </div>
+                    </div>
+
                 </fieldset>
             </div>
             <p class="version" id="version"></p>
@@ -100,12 +121,20 @@
     <script src="/External/bootstrap.bundle.min.js"></script>
     <script src="/External/jquery-3.6.0.min.js"></script>
     <!-- JS -->
+    <!--
     <script src="/Code/JS/Library/Engine/prototypeLIB_1_02_01.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Engine/engine_1_30.js" type="text/javascript"></script>
+    -->
+    <script src="/Code/JS/Library/Engine/Prototype_4_01.js" type="text/javascript"></script>
+    <script src="/Code/JS/Library/Engine/ENGINE_4_08.js" type="text/javascript"></script>
+    <script src="/Code/JS/Library/Engine/OldEngineWedge_1.00.js" type="text/javascript"></script>
+    <script src="/Code/JS/Library/Engine/LinearLevelManager_1_00.js" type="text/javascript"></script>
+    <script src="/Code/JS/Library/Engine/speech_1_05.js" type="text/javascript"></script>
     <script src="/Code/JS/Library/Misc/score_1_05.js" type="text/javascript"></script>
+    <script src="/Games/Scramblyx/Scramblyx.js" type="text/javascript"></script>
     <script src="/Assets/Definitions/Scramblyx/assets_scramblyx.js" type="text/javascript"></script>
     <script src="/Assets/Definitions/Scramblyx/levels_scramblyx.js" type="text/javascript"></script>
-    <script src="/Games/Scramblyx/scramblyx.js" type="text/javascript"></script>
+    
 </body>
 
 </html>
