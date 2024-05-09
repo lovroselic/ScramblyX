@@ -59,9 +59,8 @@ const INI = {
     LAST_LEVEL: 5
 };
 
-
 const PRG = {
-    VERSION: "1.01.02",
+    VERSION: "1.01.03",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -100,20 +99,27 @@ const PRG = {
         });
 
         ENGINE.gameWIDTH = 1280;
-        ENGINE.checkIntersection = true;
+        ENGINE.titleHEIGHT = INI.TITLE_HEIGHT;
+        ENGINE.gameHEIGHT = INI.GAME_HEIGHT;
+        //ENGINE.bottomHEIGHT
+        
+        $("#bottom").css("margin-top", ENGINE.gameHEIGHT + ENGINE.titleHEIGHT + ENGINE.bottomHEIGHT);
         $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
-        ENGINE.addBOX("LEVEL", INI.GAME_HEIGHT, 1, ["level"]);
-        ENGINE.addBOX("TITLE", INI.TITLE_HEIGHT, 1, ["title"]);
-        ENGINE.addBOX("ROOM", INI.GAME_HEIGHT, 8, ["background", "world", "plane", "bullets", "explosion", "text", "sign", "debug"]);
+        
+        ENGINE.addBOX("TITLE", ENGINE.gameWIDTH, ENGINE.titleHEIGHT, ["title"]);
+        ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "world", "plane", "bullets", "explosion", "text", "sign", "debug"]);
+        ENGINE.addBOX("LEVEL", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["level"]);
 
         $("#LEVEL").addClass("hidden");
-        LAYER.level.canvas.width = INI.LEVEL_WIDTH;
+        //LAYER.level.canvas.width = INI.LEVEL_WIDTH;
+
+        ENGINE.checkIntersection = true;
 
     },
 
     start() {
         console.log(PRG.NAME + " started.");
-        $("#startGame").addClass("hidden");
+        //$("#startGame").addClass("hidden");
 
         $(document).keypress(function (event) {
             if (event.which === 32 || event.which === 13) {
@@ -1159,6 +1165,8 @@ const TEXT = {
 const TITLE = {
     startTitle() {
         console.log("Start title");
+        this.render();
+        BACKGROUND.black();
     },
     render() {
         TITLE.background();
