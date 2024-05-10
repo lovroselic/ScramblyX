@@ -1,7 +1,27 @@
 /* assets for ScramblyX */
 console.log("Assets for INVASION starting .....");
 
+LoadFonts = [
+  { srcName: "MoriaCitadel.ttf", name: "Moria" },
+  { srcName: "AnnieUseYourTelescope.ttf", name: "Annie" },
+  { srcName: "DeepDown.ttf", name: "DeepDown" },
+  { srcName: "C64_Pro-STYLE.ttf", name: "C64" },
+  { srcName: "CosmicAlien.ttf", name: "Alien" },
+  { srcName: "ArcadeClassic.ttf", name: "Arcade" },
+  { srcName: "emulogic.ttf", name: "Emulogic" },
+  { srcName: "Adore64.ttf", name: "Adore" },
+  { srcName: "N-Gage.ttf", name: "NGage" },
+];
 
+LoadTextures = [
+
+  //title
+  { srcName: "Title/ScramblyxPilot768.jpg", name: "Title" },
+];
+LoadAudio = [
+  { srcName: "Explosion1.mp3", name: "Explosion" },
+  { srcName: "Immaculate Deception - LaughingSkull.mp3", name: "Title" }
+];
 
 /*
 var Grass = new Tile("grass1", 128, 128, "png", "grass");

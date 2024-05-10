@@ -60,7 +60,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.01.03",
+    VERSION: "1.01.04",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -101,13 +101,14 @@ const PRG = {
         ENGINE.gameWIDTH = 1280;
         ENGINE.titleHEIGHT = INI.TITLE_HEIGHT;
         ENGINE.gameHEIGHT = INI.GAME_HEIGHT;
-        //ENGINE.bottomHEIGHT
-        
+        ENGINE.bottomHEIGHT = 40;
+
         $("#bottom").css("margin-top", ENGINE.gameHEIGHT + ENGINE.titleHEIGHT + ENGINE.bottomHEIGHT);
         $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
-        
+
         ENGINE.addBOX("TITLE", ENGINE.gameWIDTH, ENGINE.titleHEIGHT, ["title"]);
-        ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "world", "plane", "bullets", "explosion", "text", "sign", "debug"]);
+        ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "world", "plane", "bullets", "explosion", "text", "sign", "debug", "button"]);
+        ENGINE.addBOX("DOWN", ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText"]);
         ENGINE.addBOX("LEVEL", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["level"]);
 
         $("#LEVEL").addClass("hidden");
@@ -470,13 +471,13 @@ const BULLETS = {
 
 const BACKGROUND = {
     black() {
-        var CTX = LAYER.background;
+        const CTX = LAYER.background;
         CTX.fillStyle = "#000";
         CTX.fillRect(0, 0, ENGINE.gameWIDTH, INI.GAME_HEIGHT);
     },
     sky() {
-        var CTX = LAYER.background;
-        var grad = CTX.createLinearGradient(0, 0, 0, INI.GAME_HEIGHT);
+        const CTX = LAYER.background;
+        const grad = CTX.createLinearGradient(0, 0, 0, INI.GAME_HEIGHT);
         grad.addColorStop("0", "#C7E7FB");
         grad.addColorStop("0.1", "#BAE2FB");
         grad.addColorStop("0.2", "#B3DFFB");
@@ -1119,7 +1120,33 @@ const GAME = {
             GAME.keymap[e.keyCode] = true;
             e.preventDefault();
         }
-    }
+    },
+    setTitle() {
+        const text = GAME.generateTitleText();
+        const RD = new RenderData("Annie", 16, "#0E0", "bottomText");
+        const SQ = new RectArea(0, 0, LAYER.bottomText.canvas.width, LAYER.bottomText.canvas.height);
+        GAME.movingText = new MovingText(text, 4, RD, SQ);
+    },
+    generateTitleText() {
+        let text = `${PRG.NAME} ${PRG.VERSION
+            }, a game by Lovro Selič, ${"\u00A9"} LaughingSkull ${PRG.YEAR
+            }. 
+             
+            Music: 'Immaculate Deception' written and performed by LaughingSkull, ${"\u00A9"
+            } 2017 Lovro Selič. `;
+        text += "     ENGINE, .... and GAME code by Lovro Selič using JavaScript. ";
+        text += "     Remastered and ported to ENGINE v4 in 2024. ";
+        text = text.split("").join(String.fromCharCode(8202));
+        return text;
+    },
+    runTitle() {
+        if (ENGINE.GAME.stopAnimation) return;
+        GAME.movingText.process();
+        GAME.titleFrameDraw();
+    },
+    titleFrameDraw() {
+        GAME.movingText.draw();
+    },
 };
 
 const TEXT = {
@@ -1167,6 +1194,13 @@ const TITLE = {
         console.log("Start title");
         this.render();
         BACKGROUND.black();
+        ENGINE.draw("background", (ENGINE.gameWIDTH - TEXTURE.Title.width) / 2, (ENGINE.gameHEIGHT - TEXTURE.Title.height) / 2, TEXTURE.Title);
+        ENGINE.topCanvas = ENGINE.getCanvasName("ROOM");
+        TITLE.drawButtons();
+        $("#DOWN")[0].scrollIntoView();
+        GAME.setTitle();
+        ENGINE.GAME.start(16);
+        ENGINE.GAME.ANIMATION.next(GAME.runTitle);
     },
     render() {
         TITLE.background();
@@ -1197,24 +1231,39 @@ const TITLE = {
     gameOver() {
         TITLE.bigText("GAME OVER", 120);
     },
+    makeGrad(CTX, x, y, w, h) {
+        let grad = CTX.createLinearGradient(x, y, w, h);
+        grad.addColorStop("0", "#DDD");
+        grad.addColorStop("0.1", "#EEE");
+        grad.addColorStop("0.2", "#DDD");
+        grad.addColorStop("0.3", "#AAA");
+        grad.addColorStop("0.4", "#999");
+        grad.addColorStop("0.5", "#666");
+        grad.addColorStop("0.6", "#555");
+        grad.addColorStop("0.7", "#777");
+        grad.addColorStop("0.8", "#AAA");
+        grad.addColorStop("0.9", "#CCC");
+        grad.addColorStop("1", "#EEE");
+        return grad;
+    },
+
     title() {
-        var CTX = LAYER.title;
-        var grad = CTX.createLinearGradient(8, 100, 128, 128);
-        grad.addColorStop("0", "#ff0000");
-        grad.addColorStop("0.2", "#cc0000");
-        grad.addColorStop("0.5", "#bb0000");
-        grad.addColorStop("0.8", "#090000");
-        grad.addColorStop("1.0", "#e60000");
-        CTX.fillStyle = grad;
-        //CTX.font = "40px Consolas";
-        CTX.font = "44px Arcade";
+        const CTX = LAYER.title;
+        const fs = 44;
+        //CTX.font = "44px Arcade";
+        CTX.font = fs + "px NGage";
         CTX.shadowColor = "#ff3300";
         CTX.shadowOffsetX = 1;
         CTX.shadowOffsetY = 1;
         CTX.shadowBlur = 2;
-        var x = 30;
-        var y = 56;
+        let mtxt = CTX.measureText(PRG.NAME);
+        let x = 30;
+        let y = 56;
+        const grad = this.makeGrad(CTX, x, y, x + mtxt.width, y - fs);
+        CTX.fillStyle = grad;
         CTX.fillText(PRG.NAME, x, y);
+
+        //
         CTX.fillStyle = "#EEE";
         CTX.shadowColor = "#CCC";
         CTX.font = "12px Consolas";
@@ -1232,10 +1281,35 @@ const TITLE = {
         CTX.fillText(String.fromCharCode(169) + " LaughingSkull 2018", x, y);
     },
     background() {
-        var CTX = LAYER.title;
+        let CTX = LAYER.title;
         CTX.fillStyle = "#000";
-        CTX.roundRect(0, 0, ENGINE.gameWIDTH, INI.TITLE_HEIGHT, { upperLeft: 10, upperRight: 10, lowerLeft: 10, lowerRight: 10 }, true, true);
-    }
+        CTX.roundRect(0, 0, ENGINE.gameWIDTH, ENGINE.titleHEIGHT, { upperLeft: 10, upperRight: 10, lowerLeft: 0, lowerRight: 0 }, true, true);
+        CTX = LAYER.bottom;
+        CTX.fillStyle = "#000";
+        CTX.roundRect(0, 0, ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, { upperLeft: 0, upperRight: 0, lowerLeft: 10, lowerRight: 10 }, true, true);
+    },
+    drawButtons() {
+        ENGINE.clearLayer("button");
+        FORM.BUTTON.POOL.clear();
+        const w = 166;
+        const h = 24;
+        let x = (((ENGINE.gameWIDTH - TEXTURE.Title.width) / 2) - w) / 2;
+        let y = ENGINE.gameHEIGHT - (3 * h);
+        
+        let startBA = new Area(x, y, w, h);
+        const buttonColors = new ColorInfo("#F00", "#A00", "#222", "#666", 13);
+        const musicColors = new ColorInfo("#0E0", "#090", "#222", "#666", 13);
+        FORM.BUTTON.POOL.push(new Button("Start game", startBA, buttonColors, GAME.start));
+        y += 1.8 * h;
+        let music = new Area(x, y, w, h);
+        FORM.BUTTON.POOL.push(new Button("Play title music", music, musicColors, TITLE.music));
+        FORM.BUTTON.draw();
+        $(ENGINE.topCanvas).on("mousemove", { layer: ENGINE.topCanvas }, ENGINE.mouseOver);
+        $(ENGINE.topCanvas).on("click", { layer: ENGINE.topCanvas }, ENGINE.mouseClick);
+    },
+    music() {
+        AUDIO.Title.play();
+    },
 };
 
 // -- main --
