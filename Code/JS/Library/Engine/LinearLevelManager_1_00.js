@@ -37,6 +37,7 @@ const LEVEL = {
           default:
             console.log("chunk type ERROR");
         }
+        
         CTX.closePath();
   
         if (chunk.pat === undefined) {

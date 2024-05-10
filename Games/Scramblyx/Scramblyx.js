@@ -10,7 +10,7 @@ const DEBUG = {
     CHEAT: false,
     debug: true,
     invincible: false,
-    LEVEL: 5,
+    LEVEL: 1,
     lives: 5
 };
 
@@ -60,7 +60,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.01.05",
+    VERSION: "1.01.06",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -87,6 +87,7 @@ const PRG = {
     setup() {
         $("#engine_version").html(ENGINE.VERSION);
         $("#lib_version").html(LIB.VERSION);
+        $("#terrain_version").html(TERRAIN.VERSION);
 
         $("#toggleHelp").click(function () {
             $("#help").toggle(400);
@@ -107,11 +108,11 @@ const PRG = {
         $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
 
         ENGINE.addBOX("TITLE", ENGINE.gameWIDTH, ENGINE.titleHEIGHT, ["title"]);
-        ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "world", "plane", "bullets", "explosion", "text", "sign", "debug", "button"]);
+        ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "world", "plane", "bullets", "explosion", "text", "FPS", "sign", "debug", "button"]);
         ENGINE.addBOX("DOWN", ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText"]);
         ENGINE.addBOX("LEVEL", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["level"]);
 
-        $("#LEVEL").addClass("hidden");
+        //$("#LEVEL").addClass("hidden");
         //LAYER.level.canvas.width = INI.LEVEL_WIDTH;
 
         ENGINE.checkIntersection = true;
@@ -128,9 +129,10 @@ const PRG = {
             }
         });
 
-        //PATTERN.create("grass", Grass);
-        //PATTERN.create("sea", Sea);
-        //PATTERN.create("sand", Sand);
+
+        PATTERN.fromTexture("GrassTerrain");
+        PATTERN.fromTexture("SandTerrain");
+        PATTERN.fromTexture("SeaTerrain");
         TITLE.startTitle();
         //GAME.start();
     }
@@ -866,19 +868,38 @@ const GAME = {
         console.info("GAME SETUP");
     },
     setDrawLevel(level) {
-        var drawLevel = level % INI.LAST_LEVEL;
-        if (drawLevel === 0)
-            drawLevel = INI.LAST_LEVEL;
+        let drawLevel = level % INI.LAST_LEVEL;
+        if (drawLevel === 0) drawLevel = INI.LAST_LEVEL;
         GAME.drawLevel = drawLevel;
+        console.log("..draw level", GAME.drawLevel);
         return;
     },
     start() {
-        $("#bottom")[0].scrollIntoView();
-        $(document).keydown(GAME.checkKey);
+        console.log("GAME started");
+        if (AUDIO.Title) {
+            AUDIO.Title.pause();
+            AUDIO.Title.currentTime = 0;
+        }
+        $(ENGINE.topCanvas).off("mousemove", ENGINE.mouseOver);
+        $(ENGINE.topCanvas).off("click", ENGINE.mouseClick);
+        $(ENGINE.topCanvas).css("cursor", "");
+        ENGINE.hideMouse();
+
+        $("#pause").prop("disabled", false);
+        $("#pause").off();
+        GAME.paused = true;
+
+
+
+
+        //$("#bottom")[0].scrollIntoView();
+        //$(document).keydown(GAME.checkKey);
         $(document).keyup(GAME.clearKey);
         GAME.level = 1;
         GAME.lives = 5;
+        GAME.score = 0;
         GAME.extraLife = SCORE.extraLife.clone();
+
 
         /****************/
         if (DEBUG.CHEAT) {
@@ -888,7 +909,12 @@ const GAME = {
         /****************/
 
         GAME.setDrawLevel(GAME.level);
-        GAME.score = 0;
+        GAME.fps = new FPS_short_term_measurement(300);
+
+
+        GAME.levelStart();
+
+        /*
         GAME.extraLife = SCORE.extraLife.clone();
         GAME.stopAnimation = false;
         PLANE.firstInit();
@@ -897,7 +923,32 @@ const GAME = {
         GAME.frame = {};
         GAME.frame.start = null;
         GAME.firstFrameDraw();
-        GAME.run();
+        GAME.run();*/
+    },
+    prepareForRestart() {
+        let clear = ["background", "text", "FPS", "button", "bottomText"];
+        ENGINE.clearManylayers(clear);
+    },
+    levelStart() {
+        console.info(" - start -", GAME.level);
+
+        GAME.prepareForRestart();
+
+        //
+        ENGINE.GAME.ANIMATION.stop(); //DEBUG
+        //
+
+        const fs = 24;
+        let y = TITLE.bigText("Campaign " + GAME.level + ".", fs);
+        y += 2 * fs;
+        TITLE.centeredText("Press 'cursor right: ->' to start the engine.", fs, y);
+        setTimeout(function () {
+            ENGINE.clearLayer("text");
+        }, 5000);
+
+        GAME.firstFrameDraw();
+
+        GAME.initLevel(GAME.level);
     },
     stop() {
         GAME.stopAnimation = true;
@@ -1017,8 +1068,8 @@ const GAME = {
     firstFrameDraw() {
         TITLE.render();
         BACKGROUND.sky();
-        PLANE.draw();
-        LEVEL.paintVisible();
+        //PLANE.draw();
+        //LEVEL.paintVisible();
         TEXT.score();
     },
     frameDraw() {
@@ -1060,23 +1111,19 @@ const GAME = {
         PLANE.init();
     },
     initLevel(level) {
+        console.info("init level", level);
         GAME.levelComplete = false;
         GAME.shotsFired = 0;
         GAME.shotsHit = 0;
         GAME.bombsDroped = 0;
         GAME.bombsHit = 0;
         GAME.x = 0;
-        ENEMY.pool.clear();
-        LEVEL.draw(GAME.drawLevel);
-        ENEMY.init();
-        ENGINE.clearLayer("text");
-        var fs = 24;
-        var y = TITLE.bigText("Campaign " + GAME.level + ".", fs);
-        y += 2 * fs;
-        TITLE.centeredText("Press 'cursor right: ->' to start the engine.", fs, y);
-        setTimeout(function () {
-            ENGINE.clearLayer("text");
-        }, 5000);
+
+        DTP.drawLevel(GAME.drawLevel, MAP, LAYER.level);
+        //ENEMY.pool.clear();
+        //LEVEL.draw(GAME.drawLevel);
+        //ENEMY.init();
+
     },
     respond() {
         var map = GAME.keymap;
@@ -1172,12 +1219,12 @@ const TEXT = {
         CTX.shadowOffsetX = 1;
         CTX.shadowOffsetY = 1;
         CTX.shadowBlur = 1;
-        var score = GAME.score.toString().padLeft(8, "0");
+        var score = GAME.score.toString().padStart(8, "0");
         CTX.fillText("SCORE: " + score, x, y);
         x += 250;
-        CTX.fillText("PLANES: " + GAME.lives.toString().padLeft(2, "0"), x, y);
+        CTX.fillText("PLANES: " + GAME.lives.toString().padStart(2, "0"), x, y);
         x += 250;
-        CTX.fillText("CAMPAIGN: " + GAME.level.toString().padLeft(2, "0"), x, y);
+        CTX.fillText("CAMPAIGN: " + GAME.level.toString().padStart(2, "0"), x, y);
         x += 300;
         var index = SCORE.SCORE.name[0].indexOf("&nbsp");
         var HS;
@@ -1295,7 +1342,7 @@ const TITLE = {
         const h = 24;
         let x = (((ENGINE.gameWIDTH - TEXTURE.Title.width) / 2) - w) / 2;
         let y = ENGINE.gameHEIGHT - (3 * h);
-        
+
         let startBA = new Area(x, y, w, h);
         const buttonColors = new ColorInfo("#F00", "#A00", "#222", "#666", 13);
         const musicColors = new ColorInfo("#0E0", "#090", "#222", "#666", 13);

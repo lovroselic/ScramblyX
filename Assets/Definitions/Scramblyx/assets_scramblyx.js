@@ -14,6 +14,10 @@ LoadFonts = [
 ];
 
 LoadTextures = [
+  //patterns
+  { srcName: "Wall/GrassTerrain.jpg", name: "GrassTerrain" },
+  { srcName: "Wall/SandTerrain.jpg", name: "SandTerrain" },
+  { srcName: "Wall/SeaTerrain.jpg", name: "SeaTerrain" },
 
   //title
   { srcName: "Title/ScramblyxPilot768.jpg", name: "Title" },
@@ -27,6 +31,7 @@ LoadAudio = [
 var Grass = new Tile("grass1", 128, 128, "png", "grass");
 var Sea = new Tile("sea", 128, 102, "png", "sea");
 var Sand = new Tile("sand", 100, 100, "png", "sand");
+
 var Spitfire = new Tile("spitfire64", 64, 17, "png", "spitfire");
 var Bullet = new Tile("roundBullet", 5, 5, "png", "bullet");
 var AExp1 = new Tile("ALIEN_exp_01", 48, 51, "png", "AlienExp1");

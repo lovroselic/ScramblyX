@@ -1,6 +1,6 @@
 /* ScramblyX LEVELS*/
 
-const LEVELS = {
+const MAP = {
   1: {
     world: [
       { w: INI.PLANE_LEFT, y: INI.ZERO, type: "L" },
@@ -223,7 +223,7 @@ const LEVELS = {
       x1: 0,
       x2: 0
     },
-    mainPattern: "grass"
+    mainPattern: "GrassTerrain"
   },
   2: {
     world: [
@@ -231,21 +231,21 @@ const LEVELS = {
       { w: 750, y: INI.ZERO, type: "L", inf: "airport" },
       { w: 200, y: 50, type: "L" },
       { w: 150, y: INI.ZERO, type: "L" },
-      { w: 250, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 300, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 300, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [640] },
-      { w: 100, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 300, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 250, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 300, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 300, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [640] },
+      { w: 100, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 300, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       {
         w: 400,
         y: INI.ZERO,
         type: "L",
-        pat: "sea",
+        pat: "SeaTerrain",
         enemy: "plane",
         h: [650, 150]
       },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 20, y: INI.ZERO, type: "L" },
       {
         w: 150,
@@ -257,20 +257,20 @@ const LEVELS = {
         inf: "palm"
       },
       { w: 20, y: INI.ZERO, type: "L" },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 500, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 450, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [100] },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 500, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 450, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [100] },
       { w: 500, y: 150, type: "L", inf: "forest", enemy: "plane", h: [250] }, 
       { w: 100, y: 400, type: "L" },
       { w: 200, y: INI.ZERO, type: "L" },
-      { w: 100, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 350, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [100] },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 350, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 300, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [250] },
-      { w: 350, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 300, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 100, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 350, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [100] },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 350, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 300, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [250] },
+      { w: 350, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 300, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 20, y: INI.ZERO, type: "L" },
       {
         w: 150,
@@ -282,10 +282,10 @@ const LEVELS = {
         inf: "palm"
       },
       { w: 20, y: INI.ZERO, type: "L" },
-      { w: 250, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [600] },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [600] },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 300, y: 120, type: "L", inf: "forest" },
       { w: 400, y: 280, type: "L", inf: "forest", enemy: "plane", h: [450] },
       { w: 300, y: 600, type: "L", enemy: "zeppelin" },
@@ -309,13 +309,13 @@ const LEVELS = {
         h: [INI.TOP]
       },
       { w: 150, y: INI.ZERO, type: "L" },
-      { w: 100, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 250, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [100] },
-      { w: 150, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 300, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [300] },
-      { w: 250, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 100, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [100] },
+      { w: 150, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 300, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [300] },
+      { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 20, y: INI.ZERO, type: "L" },
       {
         w: 150,
@@ -327,10 +327,10 @@ const LEVELS = {
         inf: "palm"
       },
       { w: 20, y: INI.ZERO, type: "L" },
-      { w: 250, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 350, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 450, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [100] },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 350, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 450, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [100] },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 20, y: INI.ZERO, type: "L" },
       {
         w: 250,
@@ -351,7 +351,7 @@ const LEVELS = {
       x1: 0,
       x2: 0
     },
-    mainPattern: "grass"
+    mainPattern: "GrassTerrain"
   },
   3: {
     world: [
@@ -438,10 +438,10 @@ const LEVELS = {
         cp: { x: 50, y: 25, f: -1 },
         inf: "palm"
       },
-      { w: 250, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [600] },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [600] },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       {
         w: 250,
         y: INI.ZERO,
@@ -522,12 +522,12 @@ const LEVELS = {
         cp: { x: 50, y: 25, f: -1 },
         inf: "palm"
       },
-      { w: 250, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [600] },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [600] },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 20, y: INI.ZERO, type: "L" },
       {
         w: 250,
@@ -544,22 +544,22 @@ const LEVELS = {
         inf: "forest",
         enemy: "plane",
         h: [600],
-        pat: "grass"
+        pat: "GrassTerrain"
       },
-      { w: 200, y: INI.ZERO, type: "L", pat: "grass" },
-      { w: 20, y: INI.ZERO, type: "L", pat: "grass" },
-      { w: 50, y: INI.ZERO, type: "L", pat: "grass" },
-      { w: 1000, y: INI.ZERO, type: "L", inf: "airport", pat: "grass" },
-      { w: 500, y: INI.ZERO, type: "L", pat: "grass" },
-      { w: 150, y: 768, type: "Q", cp: { x: 35, y: 10, f: -1 }, pat: "grass" },
-      { w: 1000, y: 768, type: "L", pat: "grass" }
+      { w: 200, y: INI.ZERO, type: "L", pat: "GrassTerrain" },
+      { w: 20, y: INI.ZERO, type: "L", pat: "GrassTerrain" },
+      { w: 50, y: INI.ZERO, type: "L", pat: "GrassTerrain" },
+      { w: 1000, y: INI.ZERO, type: "L", inf: "airport", pat: "GrassTerrain" },
+      { w: 500, y: INI.ZERO, type: "L", pat: "GrassTerrain" },
+      { w: 150, y: 768, type: "Q", cp: { x: 35, y: 10, f: -1 }, pat: "GrassTerrain" },
+      { w: 1000, y: 768, type: "L", pat: "GrassTerrain" }
     ],
     worldLength: 17620,
     airport: {
       x1: 0,
       x2: 0
     },
-    mainPattern: "sand"
+    mainPattern: "SandTerrain"
   },
   4: {
     world: [
@@ -578,11 +578,11 @@ const LEVELS = {
       { w: 300, y: 400, type: "L", enemy: "plane", h: [600] },
       { w: 50, y: 300, type: "L" },
       { w: 50, y: 250, type: "L", enemy: "plane", h: [INI.TOP] },
-      { w: 200, y: 250, type: "L", pat: "sea" },
-      { w: 400, y: 250, type: "L", pat: "sea", enemy: "ship" },
-      { w: 200, y: 250, type: "L", pat: "sea", enemy: "plane", h: [300] },
-      { w: 400, y: 250, type: "L", pat: "sea", enemy: "ship" },
-      { w: 200, y: 250, type: "L", pat: "sea", enemy: "zeppelin" },
+      { w: 200, y: 250, type: "L", pat: "SeaTerrain" },
+      { w: 400, y: 250, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 200, y: 250, type: "L", pat: "SeaTerrain", enemy: "plane", h: [300] },
+      { w: 400, y: 250, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 200, y: 250, type: "L", pat: "SeaTerrain", enemy: "zeppelin" },
       { w: 250, y: INI.TOP, type: "L" },
       { w: 250, y: 400, type: "L" },
       { w: 350, y: 300, type: "L", enemy: "zeppelin" },
@@ -633,11 +633,11 @@ const LEVELS = {
       { w: 250, y: 250, type: "L", inf: "lake", enemy: "plane", h: [520] },
       { w: 150, y: 250, type: "L", inf: "forest" },
       { w: 150, y: 250, type: "L", enemy: "tank" },
-      { w: 200, y: 250, type: "L", pat: "sea" },
-      { w: 350, y: 250, type: "L", pat: "sea", enemy: "ship" },
-      { w: 150, y: 250, type: "L", pat: "sea", enemy: "plane", h: [350] },
-      { w: 400, y: 250, type: "L", pat: "sea", enemy: "ship" },
-      { w: 200, y: 250, type: "L", pat: "sea", enemy: "zeppelin" },
+      { w: 200, y: 250, type: "L", pat: "SeaTerrain" },
+      { w: 350, y: 250, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 150, y: 250, type: "L", pat: "SeaTerrain", enemy: "plane", h: [350] },
+      { w: 400, y: 250, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 200, y: 250, type: "L", pat: "SeaTerrain", enemy: "zeppelin" },
       {
         w: 400,
         y: 350,
@@ -659,18 +659,18 @@ const LEVELS = {
         enemy: "plane",
         h: [550]
       },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [350] },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 350, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [350] },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 350, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
       {
         w: 250,
         y: INI.ZERO,
         type: "Q",
         cp: { x: 50, y: 25, f: -1 },
         inf: "palm",
-        pat: "sand"
+        pat: "SandTerrain"
       },
-      { w: 500, y: INI.ZERO, type: "L", pat: "sea", enemy: "plane", h: [150] },
+      { w: 500, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [150] },
       //
       { w: 50, y: INI.ZERO, type: "L" },
       { w: 1000, y: INI.ZERO, type: "L", inf: "airport" },
@@ -683,7 +683,7 @@ const LEVELS = {
       x1: 0,
       x2: 0
     },
-    mainPattern: "grass"
+    mainPattern: "GrassTerrain"
   },
   5: {
     world: [
@@ -691,27 +691,27 @@ const LEVELS = {
       { w: 750, y: INI.ZERO, type: "L", inf: "airport" },
       { w: 50, y: INI.ZERO, type: "L" },
       //
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       {
         w: 250,
         y: INI.ZERO,
         type: "Q",
         cp: { x: 50, y: 25, f: -1 },
         inf: "palm",
-        pat: "sand"
+        pat: "SandTerrain"
       },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 350, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 350, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       {
         w: 500,
         y: INI.ZERO,
         type: "L",
-        pat: "sea",
+        pat: "SeaTerrain",
         enemy: "plane",
         h: [200, 400, 600]
       },
-      { w: 50, y: INI.ZERO, type: "L", pat: "sand" },
+      { w: 50, y: INI.ZERO, type: "L", pat: "SandTerrain" },
       {
         w: 250,
         y: INI.ZERO,
@@ -720,10 +720,10 @@ const LEVELS = {
         inf: "palm",
         enemy: "plane",
         h: [200],
-        pat: "sand"
+        pat: "SandTerrain"
       },
-      { w: 50, y: INI.ZERO, type: "L", pat: "sand" },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 50, y: INI.ZERO, type: "L", pat: "SandTerrain" },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 50, y: 40, type: "L", enemy: "zeppelin" },
       { w: 20, y: 60, type: "L" },
       { w: 20, y: 100, type: "L" },
@@ -785,8 +785,8 @@ const LEVELS = {
         enemy: "plane",
         h: [400]
       },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 50, y: INI.ZERO, type: "L", pat: "sand" },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 50, y: INI.ZERO, type: "L", pat: "SandTerrain" },
       {
         w: 250,
         y: INI.ZERO,
@@ -795,22 +795,22 @@ const LEVELS = {
         inf: "palm",
         enemy: "plane",
         h: [200],
-        pat: "sand"
+        pat: "SandTerrain"
       },
-      { w: 50, y: INI.ZERO, type: "L", pat: "sand" },
-      { w: 200, y: INI.ZERO, type: "L", pat: "sea" },
-      { w: 350, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 250, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
-      { w: 300, y: INI.ZERO, type: "L", pat: "sea", enemy: "ship" },
+      { w: 50, y: INI.ZERO, type: "L", pat: "SandTerrain" },
+      { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
+      { w: 350, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
+      { w: 300, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
       {
         w: 500,
         y: INI.ZERO,
         type: "L",
-        pat: "sea",
+        pat: "SeaTerrain",
         enemy: "plane",
         h: [200, 600]
       },
-      { w: 50, y: INI.ZERO, type: "L", pat: "sand" },
+      { w: 50, y: INI.ZERO, type: "L", pat: "SandTerrain" },
       {
         w: 250,
         y: INI.ZERO,
@@ -819,10 +819,10 @@ const LEVELS = {
         inf: "palm",
         enemy: "plane",
         h: [200],
-        pat: "sand"
+        pat: "SandTerrain"
       },
-      { w: 50, y: INI.ZERO, type: "L", pat: "sand" },
-      { w: 400, y: INI.ZERO, type: "L", pat: "sea" },
+      { w: 50, y: INI.ZERO, type: "L", pat: "SandTerrain" },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 20, y: 30, type: "L" },
       { w: 20, y: 45, type: "L" },
       { w: 20, y: 65, type: "L" },
@@ -921,6 +921,6 @@ const LEVELS = {
       x1: 0,
       x2: 0
     },
-    mainPattern: "grass"
+    mainPattern: "GrassTerrain"
   }
 };
