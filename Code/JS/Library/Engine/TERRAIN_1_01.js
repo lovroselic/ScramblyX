@@ -255,7 +255,9 @@ const DTP = {
             this.drawChunk(world[level].world[q], CTX, world[level].mainPattern);
         }
 
-        world[level].heightData = Uint8Array.from(DTP.heightData);
+        world[level].heightData = Uint16Array.from(DTP.heightData);
+        //if (world[level].heightData.length !== WL) throw new Error("");
+        if (world[level].heightData.length !== WL) console.error("Height data incomplete");;
         console.warn("MAP", world[level]);
         console.log("************************************  END draw level ************************************");
     },
@@ -270,21 +272,35 @@ const DTP = {
         CTX.lineTo(DTP.x + chunk.w, INI.GAME_HEIGHT - chunk.y);
 
         /** top part */
+        const dY = chunk.y - (INI.GAME_HEIGHT - DTP.y); // game coord
+        const slope = dY / chunk.w;
 
         switch (chunk.type) {
             case "L":
                 CTX.lineTo(DTP.x, DTP.y);
+                for (let x = 0; x < chunk.w; x++) {
+                    let height = Math.round(slope * x) + (INI.GAME_HEIGHT - DTP.y);
+                    DTP.heightData.push(height);
+                }
+
                 break;
             case "Q":
                 let cpx = Math.floor(DTP.x + chunk.cp.x * chunk.w / 100);
-                var CY;
+                let CY;
                 if (chunk.cp.f === 1) {
                     CY = Math.min(DTP.y, INI.GAME_HEIGHT - chunk.y);
                 } else {
                     CY = Math.max(DTP.y, INI.GAME_HEIGHT - chunk.y);
                 }
-                var cpy = CY + chunk.cp.y * chunk.cp.f;
+                let cpy = CY + chunk.cp.y * chunk.cp.f;
                 CTX.quadraticCurveTo(cpx, cpy, DTP.x, DTP.y);
+                for (let x = 0; x < chunk.w; x++) {
+                    let t = x / chunk.w;
+                    //bezier approximation
+                    let yt = (1 - t) ** 2 * DTP.y + 2 * (1 - t) * t * cpy + t ** 2 * (INI.GAME_HEIGHT - chunk.y);
+                    let height = INI.GAME_HEIGHT - yt;
+                    DTP.heightData.push(height);
+                }
                 break;
             default:
                 console.log("chunk type ERROR");
@@ -295,17 +311,35 @@ const DTP = {
         /** fill pattern */
         if (chunk.pat) {
             CTX.fillStyle = PATTERN.pattern[chunk.pat].pattern;
-          } else {
+        } else {
             CTX.fillStyle = PATTERN.pattern[mainPattern].pattern;
-          }
-          console.log("CTX.fillStyle", CTX.fillStyle);
+        }
 
-          CTX.fill();
+        CTX.fill();
 
 
         /** ready for next chunk */
         DTP.x += chunk.w;
         DTP.y = INI.GAME_HEIGHT - chunk.y;
+    },
+    paintVisible(layer = "world", source = "level") {
+        ENGINE.clearLayer(layer);
+        const CTX = LAYER[layer];
+        if (GAME.x < 0) GAME.x = 0;
+        CTX.drawImage(LAYER[source].canvas, GAME.x, 0, ENGINE.gameWIDTH, INI.GAME_HEIGHT, 0, 0, ENGINE.gameWIDTH, INI.GAME_HEIGHT);
+    },
+    debugPaint(level, world, CTX) {
+        console.log("DEBUG PAINT");
+        const HD = world[level].heightData;
+        if (!HD) {
+            console.error(`Height data for level ${level} mot defined error`);
+            return;
+        }
+        CTX.fillStyle = "white";
+        for (let [x, y] of HD.entries()) {
+            y = INI.GAME_HEIGHT - y;
+            CTX.pixelAtPoint(new Point(x, y));
+        }
     }
 };
 

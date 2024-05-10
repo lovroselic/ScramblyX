@@ -11,7 +11,8 @@ const DEBUG = {
     debug: true,
     invincible: false,
     LEVEL: 1,
-    lives: 5
+    lives: 5,
+    show_hdata: true,
 };
 
 ////////////////////////////////////////////////////
@@ -60,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.01.06",
+    VERSION: "1.01.07",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -946,9 +947,10 @@ const GAME = {
             ENGINE.clearLayer("text");
         }, 5000);
 
-        GAME.firstFrameDraw();
+        
 
         GAME.initLevel(GAME.level);
+        GAME.firstFrameDraw();
     },
     stop() {
         GAME.stopAnimation = true;
@@ -1069,7 +1071,8 @@ const GAME = {
         TITLE.render();
         BACKGROUND.sky();
         //PLANE.draw();
-        //LEVEL.paintVisible();
+        DTP.paintVisible();
+        
         TEXT.score();
     },
     frameDraw() {
@@ -1120,6 +1123,7 @@ const GAME = {
         GAME.x = 0;
 
         DTP.drawLevel(GAME.drawLevel, MAP, LAYER.level);
+        DTP.debugPaint(GAME.drawLevel, MAP, LAYER.level);
         //ENEMY.pool.clear();
         //LEVEL.draw(GAME.drawLevel);
         //ENEMY.init();
@@ -1155,19 +1159,19 @@ const GAME = {
         }
         return;
     },
-    clearKey(e) {
+    /*clearKey(e) {
         e = e || window.event;
         if (e.keyCode in GAME.keymap) {
             GAME.keymap[e.keyCode] = false;
         }
-    },
-    checkKey(e) {
+    },*/
+    /*checkKey(e) {
         e = e || window.event;
         if (e.keyCode in GAME.keymap) {
             GAME.keymap[e.keyCode] = true;
             e.preventDefault();
         }
-    },
+    },*/
     setTitle() {
         const text = GAME.generateTitleText();
         const RD = new RenderData("Annie", 16, "#0E0", "bottomText");
