@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.01.07",
+    VERSION: "1.01.08",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",

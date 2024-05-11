@@ -115,6 +115,7 @@ const LEVEL = {
           default:
             break;
         }
+        
         switch (chunk.enemy) {
           case "plane":
             var NPL = chunk.h.length;

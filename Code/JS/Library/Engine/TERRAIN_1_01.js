@@ -246,13 +246,13 @@ const DTP = {
         console.log("************************************  draw level ************************************");
         const WL = world[level].worldLength
         CTX.canvas.width = WL;
-        console.log("WL", WL);
+        //console.log("WL", WL);
         DTP.x = 0;
         DTP.y = INI.GAME_HEIGHT - INI.ZERO;
         DTP.resetHeight();
 
         for (let q = 0; q < world[level].world.length; q++) {
-            this.drawChunk(world[level].world[q], CTX, world[level].mainPattern);
+            this.drawChunk(world[level].world[q], CTX, world[level].mainPattern, world[level]);
         }
 
         world[level].heightData = Uint16Array.from(DTP.heightData);
@@ -261,8 +261,8 @@ const DTP = {
         console.warn("MAP", world[level]);
         console.log("************************************  END draw level ************************************");
     },
-    drawChunk(chunk, CTX, mainPattern) {
-        console.log("CHUNK", DTP.x, DTP.y, chunk);
+    drawChunk(chunk, CTX, mainPattern, levelPointer) {
+        //console.log("CHUNK", DTP.x, DTP.y, chunk);
 
         /** bottom rectangle */
         CTX.beginPath();
@@ -316,6 +316,77 @@ const DTP = {
         }
 
         CTX.fill();
+
+
+        switch (chunk.inf) {
+            case "airport":
+                CTX.beginPath();
+                CTX.moveTo(DTP.x, DTP.y);
+                CTX.lineTo(DTP.x, DTP.y + INI.PISTE_HEIGHT);
+                CTX.lineTo(DTP.x + chunk.w, DTP.y + INI.PISTE_HEIGHT);
+                CTX.lineTo(DTP.x + chunk.w, DTP.y);
+                CTX.lineTo(DTP.x, DTP.y);
+                CTX.closePath();
+                CTX.fillStyle = "#333";
+                CTX.fill();
+                levelPointer.airport.x1 = DTP.x;
+                levelPointer.airport.x2 = DTP.x + chunk.w;
+                break;
+            case "forest":
+                /*var dY = INI.GAME_HEIGHT - chunk.y - y;
+                var slope = dY / chunk.w;
+                var nextX = 0;
+                var nextY, treeTile, treeIMG, treeWidth;
+                var TC;
+                while (nextX < chunk.w - INI.TREE_PADDING - 36) {
+                  treeTile = World.tree.chooseRandom();
+                  treeIMG = $("#" + treeTile.id)[0];
+                  nextY = Math.floor(nextX * slope);
+                  if (slope > 0) {
+                    TC = INI.TREE_CORRECTION;
+                    if (slope > 0.5)
+                      TC = Math.floor(INI.TREE_CORRECTION * (slope + 0.7));
+                  } else TC = 0;
+                  ENGINE.draw(
+                    "level",
+                    x + nextX,
+                    y + nextY - treeIMG.height + TC,
+                    treeIMG
+                  );
+                  nextX += treeIMG.width - INI.TREE_PADDING;
+                }*/
+                break;
+            case "lake":
+            /*
+          CTX.beginPath();
+          CTX.moveTo(x + INI.LAKE_PADDING, y);
+          CTX.quadraticCurveTo(
+            x + Math.floor(chunk.w / 2),
+            y + INI.PISTE_HEIGHT,
+            x + chunk.w - INI.LAKE_PADDING,
+            y
+          );
+          CTX.lineTo(x, y);
+          CTX.closePath();
+          CTX.fillStyle = "#00F";
+          CTX.fill();
+          break;*/
+            case "palm":
+                /*  
+                var palmTile, palmIMG, py;
+                var nextPx = 0;
+                while (nextPx < chunk.w - INI.TREE_PADDING - 24) {
+                  palmTile = World.palm.chooseRandom();
+                  palmIMG = $("#" + palmTile.id)[0];
+                  py = INI.GAME_HEIGHT - chunk.y - palmIMG.height;
+                  ENGINE.draw("level", x + nextPx, py, palmIMG);
+                  nextPx += palmIMG.width - INI.TREE_PADDING;
+                }*/
+                break;
+
+            default:
+                break;
+        }
 
 
         /** ready for next chunk */
