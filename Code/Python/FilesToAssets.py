@@ -14,10 +14,10 @@ from glob import glob
 
 # Prefix = ''
 
-# Directory = 'C:/Users/lovro/OneDrive/Documents/JS/Scramblyx/Assets/Graphics/Sprites/Items'
-Directory = 'C:/Users/lovro/OneDrive/Documents/JS/Scramblyx/Assets/Graphics/Textures/Wall'
-# Prefix = 'Items/'
-Prefix = 'Wall/'
+Directory = 'C:/Users/lovro/OneDrive/Documents/JS/Scramblyx/Assets/Graphics/Sprites/Items'
+# Directory = 'C:/Users/lovro/OneDrive/Documents/JS/Scramblyx/Assets/Graphics/Textures/Wall'
+Prefix = 'Items/'
+# Prefix = 'Wall/'
 files = []
 ext = ['*.png', '*.jpg']
 # template = '{ srcName: {}, name: {} },\n'

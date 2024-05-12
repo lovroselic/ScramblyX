@@ -61,7 +61,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.01.08",
+    VERSION: "1.01.09",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -855,16 +855,6 @@ const ENEMY = {
 };*/
 
 const GAME = {
-    /*keymap: {
-        17: false,
-        37: false,
-        38: false,
-        39: false,
-        40: false,
-        32: false,
-        13: false,
-        120: false
-    },*/
     setup() {
         console.info("GAME SETUP");
     },
@@ -897,6 +887,7 @@ const GAME = {
         //$(document).keydown(GAME.checkKey);
         $(document).keyup(GAME.clearKey);
         GAME.level = 1;
+        //GAME.level = 2;
         GAME.lives = 5;
         GAME.score = 0;
         GAME.extraLife = SCORE.extraLife.clone();
@@ -916,7 +907,6 @@ const GAME = {
         GAME.levelStart();
 
         /*
-        GAME.extraLife = SCORE.extraLife.clone();
         GAME.stopAnimation = false;
         PLANE.firstInit();
         GAME.ended = false;

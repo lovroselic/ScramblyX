@@ -241,7 +241,10 @@ const DTP = {
     resetHeight() {
         DTP.heightData = [];
     },
-    INI: {},
+    INI: {
+        NTREE: 8,
+        NPALM: 5,
+    },
     drawLevel(level, world, CTX) {
         console.log("************************************  draw level ************************************");
         const WL = world[level].worldLength
@@ -273,7 +276,7 @@ const DTP = {
 
         /** top part */
         const dY = chunk.y - (INI.GAME_HEIGHT - DTP.y); // game coord
-        const slope = dY / chunk.w;
+        var slope = dY / chunk.w;
 
         switch (chunk.type) {
             case "L":
@@ -317,7 +320,6 @@ const DTP = {
 
         CTX.fill();
 
-
         switch (chunk.inf) {
             case "airport":
                 CTX.beginPath();
@@ -332,56 +334,35 @@ const DTP = {
                 levelPointer.airport.x1 = DTP.x;
                 levelPointer.airport.x2 = DTP.x + chunk.w;
                 break;
-            case "forest":
-                /*var dY = INI.GAME_HEIGHT - chunk.y - y;
-                var slope = dY / chunk.w;
-                var nextX = 0;
-                var nextY, treeTile, treeIMG, treeWidth;
-                var TC;
-                while (nextX < chunk.w - INI.TREE_PADDING - 36) {
-                  treeTile = World.tree.chooseRandom();
-                  treeIMG = $("#" + treeTile.id)[0];
-                  nextY = Math.floor(nextX * slope);
-                  if (slope > 0) {
-                    TC = INI.TREE_CORRECTION;
-                    if (slope > 0.5)
-                      TC = Math.floor(INI.TREE_CORRECTION * (slope + 0.7));
-                  } else TC = 0;
-                  ENGINE.draw(
-                    "level",
-                    x + nextX,
-                    y + nextY - treeIMG.height + TC,
-                    treeIMG
-                  );
-                  nextX += treeIMG.width - INI.TREE_PADDING;
-                }*/
-                break;
             case "lake":
-            /*
-          CTX.beginPath();
-          CTX.moveTo(x + INI.LAKE_PADDING, y);
-          CTX.quadraticCurveTo(
-            x + Math.floor(chunk.w / 2),
-            y + INI.PISTE_HEIGHT,
-            x + chunk.w - INI.LAKE_PADDING,
-            y
-          );
-          CTX.lineTo(x, y);
-          CTX.closePath();
-          CTX.fillStyle = "#00F";
-          CTX.fill();
-          break;*/
+                CTX.beginPath();
+                CTX.moveTo(DTP.x + INI.LAKE_PADDING, DTP.y);
+                CTX.quadraticCurveTo(DTP.x + Math.floor(chunk.w / 2), DTP.y + INI.PISTE_HEIGHT, DTP.x + chunk.w - INI.LAKE_PADDING, DTP.y);
+                CTX.lineTo(DTP.x, DTP.y);
+                CTX.closePath();
+                CTX.fillStyle = "#00F";
+                CTX.fill();
+                break;
+            case "forest":
+                let nextX = 0;
+                while (nextX < chunk.w - INI.TREE_PADDING - 36) {
+                    let treeIndex = RND(1, DTP.INI.NTREE)
+                    let treeImage = SPRITE[`tree${treeIndex}`];
+                    let nextY = Math.round(nextX * -slope);
+                    CTX.drawImage(treeImage, DTP.x + nextX, DTP.y + nextY - treeImage.height + getTC(slope));
+                    nextX += treeImage.width - INI.TREE_PADDING;
+                }
+                break;
+
             case "palm":
-                /*  
-                var palmTile, palmIMG, py;
-                var nextPx = 0;
-                while (nextPx < chunk.w - INI.TREE_PADDING - 24) {
-                  palmTile = World.palm.chooseRandom();
-                  palmIMG = $("#" + palmTile.id)[0];
-                  py = INI.GAME_HEIGHT - chunk.y - palmIMG.height;
-                  ENGINE.draw("level", x + nextPx, py, palmIMG);
-                  nextPx += palmIMG.width - INI.TREE_PADDING;
-                }*/
+                let nextPX = 0;
+                while (nextPX < chunk.w - INI.TREE_PADDING - 24) {
+                    let palmIndex = RND(1, DTP.INI.NPALM)
+                    let palmImage = SPRITE[`palm${palmIndex}`];
+                    let nextY = Math.round(nextPX * -slope);
+                    CTX.drawImage(palmImage, DTP.x + nextPX, DTP.y + nextY - palmImage.height + getTC(slope));
+                    nextPX += palmImage.width - INI.TREE_PADDING;
+                }
                 break;
 
             default:
@@ -392,6 +373,16 @@ const DTP = {
         /** ready for next chunk */
         DTP.x += chunk.w;
         DTP.y = INI.GAME_HEIGHT - chunk.y;
+
+        function getTC(slope){
+            let TC = 0;
+            if (-slope > 0.5) {
+                TC = Math.floor(INI.TREE_CORRECTION * (-slope + 0.7));
+            } else if (-slope > 0) {
+                TC = INI.TREE_CORRECTION;
+            }
+            return TC;
+        }
     },
     paintVisible(layer = "world", source = "level") {
         ENGINE.clearLayer(layer);

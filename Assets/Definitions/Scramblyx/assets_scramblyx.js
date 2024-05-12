@@ -27,6 +27,33 @@ LoadAudio = [
   { srcName: "Immaculate Deception - LaughingSkull.mp3", name: "Title" }
 ];
 
+LoadSprites = [
+  { srcName: "Items/battleShip1.png", name: "battleShip1" },
+  { srcName: "Items/battleShip2.png", name: "battleShip2" },
+  { srcName: "Items/battleShip3.png", name: "battleShip3" },
+  { srcName: "Items/battleShip4.png", name: "battleShip4" },
+  { srcName: "Items/palm1.png", name: "palm1" },
+  { srcName: "Items/palm2.png", name: "palm2" },
+  { srcName: "Items/palm3.png", name: "palm3" },
+  { srcName: "Items/palm4.png", name: "palm4" },
+  { srcName: "Items/palm5.png", name: "palm5" },
+  { srcName: "Items/tank1.png", name: "tank1" },
+  { srcName: "Items/tank2.png", name: "tank2" },
+  { srcName: "Items/tank3.png", name: "tank3" },
+  { srcName: "Items/tank4.png", name: "tank4" },
+  { srcName: "Items/tank5.png", name: "tank5" },
+  { srcName: "Items/tank6.png", name: "tank6" },
+  { srcName: "Items/tree1.png", name: "tree1" },
+  { srcName: "Items/tree2.png", name: "tree2" },
+  { srcName: "Items/tree3.png", name: "tree3" },
+  { srcName: "Items/tree4.png", name: "tree4" },
+  { srcName: "Items/tree5.png", name: "tree5" },
+  { srcName: "Items/tree6.png", name: "tree6" },
+  { srcName: "Items/tree7.png", name: "tree7" },
+  { srcName: "Items/tree8.png", name: "tree8" },
+  { srcName: "Items/zeppelin.png", name: "zeppelin" },
+];
+
 /*
 var Grass = new Tile("grass1", 128, 128, "png", "grass");
 var Sea = new Tile("sea", 128, 102, "png", "sea");
