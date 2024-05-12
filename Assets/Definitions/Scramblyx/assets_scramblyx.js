@@ -54,6 +54,24 @@ LoadSprites = [
   { srcName: "Items/zeppelin.png", name: "zeppelin" },
 ];
 
+LoadRotated = [
+  //bomb
+  { srcName: "bomb1.png", count: 1, name: "Bomb", rotate: { first: 0, last: 180, step: 1 } },
+  //planes
+  { srcName: "Plane1.png", name: "Plane1", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane10.png", name: "Plane10", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane11.png", name: "Plane11", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane2.png", name: "Plane2", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane3.png", name: "Plane3", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane4.png", name: "Plane4", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane5.png", name: "Plane5", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane6.png", name: "Plane6", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane7.png", name: "Plane7", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane8.png", name: "Plane8", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane9.png", name: "Plane9", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "spitfire64.png", name: "Spitfire", rotate: { first: -30, last: 30, step: 1 }  },
+];
+
 /*
 var Grass = new Tile("grass1", 128, 128, "png", "grass");
 var Sea = new Tile("sea", 128, 102, "png", "sea");
