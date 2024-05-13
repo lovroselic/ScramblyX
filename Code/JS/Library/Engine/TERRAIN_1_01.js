@@ -251,7 +251,7 @@ const DTP = {
         CTX.canvas.width = WL;
         //console.log("WL", WL);
         DTP.x = 0;
-        DTP.y = INI.GAME_HEIGHT - INI.ZERO;
+        DTP.y = ENGINE.gameHEIGHT - INI.ZERO;
         DTP.resetHeight();
 
         for (let q = 0; q < world[level].world.length; q++) {
@@ -259,6 +259,7 @@ const DTP = {
         }
 
         world[level].heightData = Uint16Array.from(DTP.heightData);
+        world[level].planeLimits = { width: WL };
         //if (world[level].heightData.length !== WL) throw new Error("");
         if (world[level].heightData.length !== WL) console.error("Height data incomplete");;
         console.warn("MAP", world[level]);
@@ -270,19 +271,19 @@ const DTP = {
         /** bottom rectangle */
         CTX.beginPath();
         CTX.moveTo(DTP.x, DTP.y);
-        CTX.lineTo(DTP.x, INI.GAME_HEIGHT);
-        CTX.lineTo(DTP.x + chunk.w, INI.GAME_HEIGHT);
-        CTX.lineTo(DTP.x + chunk.w, INI.GAME_HEIGHT - chunk.y);
+        CTX.lineTo(DTP.x, ENGINE.gameHEIGHT);
+        CTX.lineTo(DTP.x + chunk.w, ENGINE.gameHEIGHT);
+        CTX.lineTo(DTP.x + chunk.w, ENGINE.gameHEIGHT - chunk.y);
 
         /** top part */
-        const dY = chunk.y - (INI.GAME_HEIGHT - DTP.y); // game coord
+        const dY = chunk.y - (ENGINE.gameHEIGHT - DTP.y); // game coord
         var slope = dY / chunk.w;
 
         switch (chunk.type) {
             case "L":
                 CTX.lineTo(DTP.x, DTP.y);
                 for (let x = 0; x < chunk.w; x++) {
-                    let height = Math.round(slope * x) + (INI.GAME_HEIGHT - DTP.y);
+                    let height = Math.round(slope * x) + (ENGINE.gameHEIGHT - DTP.y);
                     DTP.heightData.push(height);
                 }
 
@@ -291,17 +292,17 @@ const DTP = {
                 let cpx = Math.floor(DTP.x + chunk.cp.x * chunk.w / 100);
                 let CY;
                 if (chunk.cp.f === 1) {
-                    CY = Math.min(DTP.y, INI.GAME_HEIGHT - chunk.y);
+                    CY = Math.min(DTP.y, ENGINE.gameHEIGHT - chunk.y);
                 } else {
-                    CY = Math.max(DTP.y, INI.GAME_HEIGHT - chunk.y);
+                    CY = Math.max(DTP.y, ENGINE.gameHEIGHT - chunk.y);
                 }
                 let cpy = CY + chunk.cp.y * chunk.cp.f;
                 CTX.quadraticCurveTo(cpx, cpy, DTP.x, DTP.y);
                 for (let x = 0; x < chunk.w; x++) {
                     let t = x / chunk.w;
                     //bezier approximation
-                    let yt = (1 - t) ** 2 * DTP.y + 2 * (1 - t) * t * cpy + t ** 2 * (INI.GAME_HEIGHT - chunk.y);
-                    let height = INI.GAME_HEIGHT - yt;
+                    let yt = (1 - t) ** 2 * DTP.y + 2 * (1 - t) * t * cpy + t ** 2 * (ENGINE.gameHEIGHT - chunk.y);
+                    let height = ENGINE.gameHEIGHT - yt;
                     DTP.heightData.push(height);
                 }
                 break;
@@ -372,9 +373,9 @@ const DTP = {
 
         /** ready for next chunk */
         DTP.x += chunk.w;
-        DTP.y = INI.GAME_HEIGHT - chunk.y;
+        DTP.y = ENGINE.gameHEIGHT - chunk.y;
 
-        function getTC(slope){
+        function getTC(slope) {
             let TC = 0;
             if (-slope > 0.5) {
                 TC = Math.floor(INI.TREE_CORRECTION * (-slope + 0.7));
@@ -388,7 +389,7 @@ const DTP = {
         ENGINE.clearLayer(layer);
         const CTX = LAYER[layer];
         if (GAME.x < 0) GAME.x = 0;
-        CTX.drawImage(LAYER[source].canvas, GAME.x, 0, ENGINE.gameWIDTH, INI.GAME_HEIGHT, 0, 0, ENGINE.gameWIDTH, INI.GAME_HEIGHT);
+        CTX.drawImage(LAYER[source].canvas, GAME.x, 0, ENGINE.gameWIDTH, ENGINE.gameHEIGHT, 0, 0, ENGINE.gameWIDTH, ENGINE.gameHEIGHT);
     },
     debugPaint(level, world, CTX) {
         console.log("DEBUG PAINT");
@@ -399,7 +400,7 @@ const DTP = {
         }
         CTX.fillStyle = "white";
         for (let [x, y] of HD.entries()) {
-            y = INI.GAME_HEIGHT - y;
+            y = ENGINE.gameHEIGHT - y;
             CTX.pixelAtPoint(new Point(x, y));
         }
     }

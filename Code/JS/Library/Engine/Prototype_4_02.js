@@ -6,7 +6,7 @@
 console.clear();
 
 const LIB = {
-  VERSION: "4.01",
+  VERSION: "4.02",
   CSS: "color: #EFE",
   log: function () {
     console.log(`%cPrototype LIB ${LIB.VERSION} loaded`, LIB.CSS);
@@ -19,7 +19,9 @@ as used by LS
 
 changelog:
 4.00: new fresh version, master grid and vector classes
-4.01; Area, RectArea consolidated and removed from ENGINE
+4.01: Area, RectArea consolidated and removed from ENGINE
+4.02: Point.coClass bug corrected
+      Point as extension of masterGrid class
 
 */
 
@@ -942,13 +944,14 @@ class Direction {
     return -1;
   }
 }
-class Point {
+class Point extends MasterGridClass {
   constructor(x = 0, y = 0) {
+    super();
     this.x = Math.round(x);
     this.y = Math.round(y);
   }
   static toClass(point) {
-    return new Grid(point.x, point.y);
+    return new Point(point.x, point.y);
   }
   translate(vector, len = ENGINE.INI.GRIDPIX) {
     return new Point(this.x + vector.x * len, this.y + vector.y * len);

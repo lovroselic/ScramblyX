@@ -12,7 +12,8 @@ const DEBUG = {
     invincible: false,
     LEVEL: 1,
     lives: 5,
-    show_hdata: true,
+    show_hdata: false,
+    FPS: true,
 };
 
 ////////////////////////////////////////////////////
@@ -36,7 +37,7 @@ const INI = {
     MOVE: 8,
     PLANE_LEFT: 40,
     PLANE_RIGHT: 600,
-    MAX_SPEED: 8,
+    MAX_SPEED: 8, // was 8
     REWIND_MAX: -96,
     TREE_PADDING: 12,
     LAKE_PADDING: 10,
@@ -57,11 +58,12 @@ const INI = {
     SHIP_SHOOT: 1600,
     SHIP_RANDOM: 300,
     LEVEL_BONUS: 100000,
-    LAST_LEVEL: 5
+    LAST_LEVEL: 5,
+    ACCELERATION_FACTOR: 0.1 * 60,
 };
 
 const PRG = {
-    VERSION: "1.01.10",
+    VERSION: "1.01.11",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -142,78 +144,86 @@ const PRG = {
 ///////////////////////////////////////////////////////////////////
 const PLANE = {
     firstInit() {
-        PLANE.plane = "spitfire";
-        PLANE.init();
-        PLANE.ZERO = INI.GAME_HEIGHT - INI.ZERO - Math.floor(PLANE.sprite.height / 2);
-        PLANE.TOP = INI.ZERO + 12;
-        PLANE.position();
+        this.plane = "Spitfire";
+        this.angle = 0;
+        this.sprite = SPRITE[PLANE.plane + "_" + PLANE.angle];
+        this.ignoreByManager = true;
+
+        this.ZERO = INI.ZERO + Math.floor(PLANE.sprite.height / 2);
+        //this.ZERO = ENGINE.gameHEIGHT - INI.ZERO - Math.floor(PLANE.sprite.height / 2);
+        this.TOP = INI.TOP + 12;
+        this.init();
+        this.position();
     },
     position() {
-        PLANE.y = PLANE.ZERO;
-        PLANE.x = Math.floor(PLANE.sprite.width / 2) + INI.PLANE_LEFT;
-        PLANE.angle = 0;
+        this.y = this.ZERO;
+        this.x = Math.floor(this.sprite.width / 2) + INI.PLANE_LEFT;
+        this.angle = 0;
     },
     init() {
-        PLANE.sprite = SPRITE[PLANE.plane];
-        PLANE.speed = 0;
-        PLANE.airborne = false;
-        PLANE.landed = true;
-        PLANE.landing = false;
-        PLANE.acceleration = false;
-        PLANE.x = Math.floor(PLANE.sprite.width / 2) + INI.PLANE_LEFT;
+        this.sprite = SPRITE[PLANE.plane + "_" + PLANE.angle];
+        this.speed = 0;
+        this.airborne = false;
+        this.landed = true;
+        this.landing = false;
+        this.dead = false;
+        this.acceleration = false;
     },
     draw() {
-        if (PLANE.dead)
-            return;
-        PLANE.sprite = SPRITE[PLANE.plane + "_" + PLANE.angle];
-        ENGINE.spriteDraw("plane", PLANE.x, PLANE.y, PLANE.sprite);
+        if (this.dead) return;
+        this.sprite = SPRITE[this.plane + "_" + this.angle];
+        ENGINE.spriteDraw("plane", this.x, ENGINE.gameHEIGHT - this.y, this.sprite);
+        ENGINE.layersToClear.add("plane");
     },
-    move(smer) {
-        if (PLANE.landing)
-            return;
-        if (PLANE.speed < INI.MAX_SPEED && GAME.keymap[38])
-            return;
-        if (PLANE.landed && GAME.keymap[40])
-            return;
-        if (PLANE.landed && GAME.keymap[38]) {
-            PLANE.landed = false;
-            PLANE.airborne = true;
-            PLANE.y -= 2;
-            PLANE.bulletReady = true;
-            PLANE.bombReady = true;
-        }
-        GAME.keymap[38] = false;
-        GAME.keymap[40] = false;
-        PLANE.angle = PLANE.angle + smer.y * 5;
-        if (PLANE.angle < 0)
-            PLANE.angle += 360;
-        if (PLANE.angle === 360)
-            PLANE.angle = 0;
-        if (PLANE.angle > 30 && PLANE.angle < 320)
-            PLANE.angle = 30;
-        else if (PLANE.angle < 330 && PLANE.angle > 40)
-            PLANE.angle = 330;
-    },
-    lateral(smer) {
-        if (PLANE.landing)
-            return;
-        if (
-            PLANE.speed < INI.MAX_SPEED &&
-            !PLANE.acceleration &&
-            !GAME.levelComplete
-        ) {
+    /*getY() {
+        return ENGINE.gameHEIGHT - PLANE.y;
+    },*/
+
+
+    /* move(smer) {
+         if (PLANE.landing)
+             return;
+         if (PLANE.speed < INI.MAX_SPEED && GAME.keymap[38])
+             return;
+         if (PLANE.landed && GAME.keymap[40])
+             return;
+         if (PLANE.landed && GAME.keymap[38]) {
+             PLANE.landed = false;
+             PLANE.airborne = true;
+             PLANE.y -= 2;
+             PLANE.bulletReady = true;
+             PLANE.bombReady = true;
+         }
+         GAME.keymap[38] = false;
+         GAME.keymap[40] = false;
+         PLANE.angle = PLANE.angle + smer.y * 5;
+         if (PLANE.angle < 0)
+             PLANE.angle += 360;
+         if (PLANE.angle === 360)
+             PLANE.angle = 0;
+         if (PLANE.angle > 30 && PLANE.angle < 320)
+             PLANE.angle = 30;
+         else if (PLANE.angle < 330 && PLANE.angle > 40)
+             PLANE.angle = 330;
+     },*/
+
+
+    lateral(dir) {
+        if (PLANE.landing) return;
+
+        if (PLANE.speed < INI.MAX_SPEED && !PLANE.acceleration && !GAME.levelComplete) {
             PLANE.acceleration = true;
             PLANE.speed = 1;
         }
-        if (PLANE.landed)
-            return;
-        PLANE.x += smer.x * INI.MOVE;
-        if (PLANE.x < INI.PLANE_LEFT)
-            PLANE.x = INI.PLANE_LEFT;
-        if (PLANE.x > INI.PLANE_RIGHT)
-            PLANE.x = INI.PLANE_RIGHT;
+
+        if (PLANE.landed) return;
+
+        PLANE.x += dir.x * INI.MOVE; //adjust to lapsedTime
+        if (PLANE.x < INI.PLANE_LEFT) PLANE.x = INI.PLANE_LEFT;
+        if (PLANE.x > INI.PLANE_RIGHT) PLANE.x = INI.PLANE_RIGHT;
     },
-    collisions() {
+
+    /*collisions() {
         if (PLANE.landed && GAME.x < GAME.airportLength - INI.MAX_SPEED)
             return;
         if (PLANE.dead)
@@ -230,8 +240,8 @@ const PLANE = {
                 PLANE.die();
             }
         }
-    },
-    collisionBullet() {
+    },*/
+    /*collisionBullet() {
         if (PLANE.landed && GAME.x < GAME.airportLength - INI.MAX_SPEED)
             return;
         if (PLANE.dead)
@@ -256,7 +266,7 @@ const PLANE = {
                 PLANE.die();
             }
         }
-    },
+    },*/
     die() {
         PLANE.dead = true;
         GAME.rewind = true;
@@ -279,7 +289,7 @@ const PLANE = {
         var vy2 = Math.round(
             INI.BULLET_SPEED * Math.sin(PLANE.angle * Math.PI / 180)
         );
-        var vy1 = PLANE.getY(PLANE.angle);
+        var vy1 = PLANE.getDY(PLANE.angle);
         var vy = vy1 + vy2;
         var y = PLANE.y + vy;
         BULLETS.pool.push(new BulletClass(x, y, vx, vy, 0));
@@ -288,7 +298,7 @@ const PLANE = {
             PLANE.bulletReady = true;
         }, INI.BULLET_TIMEOUT);
     },
-    getY(angle) {
+    getDY(angle) {
         var smer;
         if (angle > 30) {
             smer = -1;
@@ -298,18 +308,15 @@ const PLANE = {
         return Math.floor(smer * (angle / 5));
     },
     dropBomb() {
-        if (PLANE.dead)
-            return;
-        if (!PLANE.airborne)
-            return;
-        if (!PLANE.bombReady)
-            return;
+        if (PLANE.dead) return;
+        if (!PLANE.airborne) return;
+        if (!PLANE.bombReady) return;
         PLANE.bombReady = false;
 
         var x = PLANE.x + Math.floor(PLANE.sprite.width * 0.6);
         var vx = Math.floor(PLANE.speed * Math.cos(PLANE.angle * Math.PI / 180));
         var vy2 = Math.floor(PLANE.speed * Math.sin(PLANE.angle * Math.PI / 180));
-        var vy1 = PLANE.getY(PLANE.angle);
+        var vy1 = PLANE.getDY(PLANE.angle);
         var vy = vy1 + vy2;
         if (vy < 0)
             vy = 0;
@@ -523,6 +530,12 @@ var ACTOR = function (sprite_class, x, y, angle, prevX, prevY) {
 };
 */
 
+
+class Enemy {
+    constructor(position) {
+        this.position = position;
+    }
+}
 /*
 var ENEMY_ACTOR = function (
     sprite_class,
@@ -706,7 +719,7 @@ const ENEMY = {
                     if (realAng < 0)
                         realAng += 360;
                     ENEMY.active[q].actor.angle = realAng;
-                    var changeY = PLANE.getY(realAng);
+                    var changeY = PLANE.getDY(realAng);
                     ENEMY.active[q].actor.y -= changeY;
                 } else {
                     ENEMY.active[q].actor.angle = 0;
@@ -880,6 +893,11 @@ const GAME = {
         $("#pause").off();
         GAME.paused = true;
 
+        let GameRD = new RenderData("NGage", 48, "#DDD", "text", "#000", 2, 2, 2);
+        ENGINE.TEXT.setRD(GameRD);
+        ENGINE.watchVisibility(GAME.lostFocus);
+        ENGINE.GAME.start(16);
+
 
 
 
@@ -903,12 +921,13 @@ const GAME = {
         GAME.setDrawLevel(GAME.level);
         GAME.fps = new FPS_short_term_measurement(300);
 
+        PLANE.firstInit();
 
         GAME.levelStart();
 
         /*
         GAME.stopAnimation = false;
-        PLANE.firstInit();
+        
         GAME.ended = false;
         GAME.initLevel(GAME.level);
         GAME.frame = {};
@@ -937,10 +956,7 @@ const GAME = {
             ENGINE.clearLayer("text");
         }, 5000);
 
-        
-
         GAME.initLevel(GAME.level);
-        GAME.firstFrameDraw();
     },
     stop() {
         GAME.stopAnimation = true;
@@ -961,9 +977,13 @@ const GAME = {
         TEXT.score();
         $("#startGame").removeClass("hidden");
     },
-    move() {
+    move(lapsedTime) {
+        console.info("PLANE.y", PLANE.y);
+        const timeF = 1000 / lapsedTime;
+        //console.log("move", lapsedTime);
         if (PLANE.landing) {
-            PLANE.speed -= 0.1;
+            //PLANE.speed -= 0.1; //adjust
+            PLANE.speed -= INI.ACCELERATION_FACTOR / timeF;
             if (!PLANE.clearForlanding) {
                 PLANE.die();
                 PLANE.landing = false;
@@ -978,8 +998,7 @@ const GAME = {
         }
         if (GAME.rewind) {
             PLANE.speed -= 1;
-            if (PLANE.speed < INI.REWIND_MAX)
-                PLANE.speed = INI.REWIND_MAX;
+            if (PLANE.speed < INI.REWIND_MAX) PLANE.speed = INI.REWIND_MAX;
             if (GAME.x <= 0) {
                 GAME.x = 0;
                 if (GAME.ended) {
@@ -989,46 +1008,55 @@ const GAME = {
                     GAME.rewind = false;
                     PLANE.init();
                     PLANE.position();
-                    ENEMY.active.clear();
-                    ENEMY.init();
+                    //ENEMY.active.clear();
+                    //ENEMY.init();
                 }
             }
         }
         if (PLANE.acceleration) {
-            PLANE.speed += 0.1;
+            PLANE.speed += INI.ACCELERATION_FACTOR / timeF;
             if (PLANE.speed > INI.MAX_SPEED) {
                 PLANE.speed = INI.MAX_SPEED;
                 PLANE.acceleration = false;
             }
         }
-        GAME.x += Math.floor(PLANE.speed);
-        if (GAME.x > LEVELS[GAME.drawLevel].worldLength) {
-            GAME.x = LEVELS[GAME.drawLevel].worldLength;
-            GAME.stopAnimation = true;
-            //console.log("Stopped animation at ", GAME.x);
-        }
-        if (
-            PLANE.x + GAME.x >= LEVELS[GAME.drawLevel].airport.x1 &&
-            PLANE.x + GAME.x <= LEVELS[GAME.drawLevel].airport.x2
-        ) {
-            PLANE.clearForlanding = true;
-        } else
-            PLANE.clearForlanding = false;
 
-        PLANE.y += PLANE.getY(PLANE.angle);
-        if (PLANE.y > PLANE.ZERO) {
+        GAME.x += Math.floor(PLANE.speed);
+        //console.log("GAME.x", GAME.x);
+
+        /** debug */
+        if (GAME.x > MAP[GAME.drawLevel].worldLength) {
+            GAME.x = MAP[GAME.drawLevel].worldLength;
+            GAME.stopAnimation = true;
+            console.error("Stopped animation at ", GAME.x);
+        }
+        /** */
+
+        if (PLANE.x + GAME.x >= MAP[GAME.drawLevel].airport.x1 && PLANE.x + GAME.x <= LEVELS[GAME.drawLevel].airport.x2) {
+            PLANE.clearForlanding = true;
+        } else PLANE.clearForlanding = false;
+
+
+        PLANE.y += PLANE.getDY(PLANE.angle);
+
+        if (PLANE.y < PLANE.ZERO) {
             PLANE.y = PLANE.ZERO;
             PLANE.angle = 0;
         }
-        if (PLANE.y < PLANE.TOP) {
+        if (PLANE.y > PLANE.TOP) {
             PLANE.y = PLANE.TOP;
             PLANE.angle = 0;
         }
 
-        if (PLANE.speed === INI.MAX_SPEED && !PLANE.dead)
-            GAME.score += 1;
+        if (PLANE.speed === INI.MAX_SPEED && !PLANE.dead) GAME.score += 1;
     },
-    run() {
+    run(lapsedTime) {
+        if (ENGINE.GAME.stopAnimation) return;
+        GAME.respond(lapsedTime);
+        GAME.move(lapsedTime);
+        GAME.frameDraw(lapsedTime);
+    },
+    /*run() {
         if (!GAME.frame.start)
             GAME.frame.start = Date.now();
         var current = Date.now();
@@ -1056,17 +1084,23 @@ const GAME = {
             return;
         } else
             requestAnimationFrame(GAME.run);
-    },
+    },*/
     firstFrameDraw() {
         TITLE.render();
         BACKGROUND.sky();
-        //PLANE.draw();
         DTP.paintVisible();
-        
+        PLANE.draw();
         TEXT.score();
     },
-    frameDraw() {
-        LEVEL.paintVisible();
+    frameDraw(lapsedTime) {
+        ENGINE.clearLayerStack();
+        DTP.paintVisible();
+        PLANE.draw();
+        TEXT.score();
+        if (DEBUG.FPS) GAME.FPS(lapsedTime);
+
+
+        /*LEVEL.paintVisible();
         EXPLOSIONS.draw();
         ENGINE.clearLayer("plane");
         PLANE.draw();
@@ -1074,7 +1108,15 @@ const GAME = {
         ENGINE.clearLayer("bullets");
         BULLETS.draw();
         BOMBS.draw();
-        TEXT.score();
+        TEXT.score();*/
+    },
+    FPS(lapsedTime) {
+        let CTX = LAYER.FPS;
+        CTX.fillStyle = "black";
+        ENGINE.clearLayer("FPS");
+        let fps = 1000 / lapsedTime || 0;
+        GAME.fps.update(fps);
+        CTX.fillText(GAME.fps.getFps(), 5, 10);
     },
     endLevel() {
         console.log("Level ", GAME.level, " complete.");
@@ -1113,18 +1155,78 @@ const GAME = {
         GAME.x = 0;
 
         DTP.drawLevel(GAME.drawLevel, MAP, LAYER.level);
-        DTP.debugPaint(GAME.drawLevel, MAP, LAYER.level);
+        if (DEBUG.show_hdata) DTP.debugPaint(GAME.drawLevel, MAP, LAYER.level);
         //ENEMY.pool.clear();
-        //LEVEL.draw(GAME.drawLevel);
         //ENEMY.init();
-
+        GAME.continueLevel(level);
     },
-    respond() {
-        var map = GAME.keymap;
-        if (map[120]) {
-            console.log("GAME.x:", GAME.x);
-            console.log("plane.y", PLANE.y);
+    continueLevel(level) {
+        console.log("game continues on level", level);
+        GAME.levelExecute(level);
+    },
+    levelExecute(level) {
+        console.log("level", level, "executes");
+        GAME.firstFrameDraw(); //
+        //GAME.drawFirstFrame(level);
+        GAME.resume();
+        let texts = [
+
+        ];
+        //SPEECH.speak(texts.chooseRandom());
+    },
+    lostFocus() {
+        if (GAME.paused || false) return;
+        GAME.clickPause();
+    },
+    clickPause() {
+        if (false || GAME.levelCompleted) return;
+        $("#pause").trigger("click");
+        ENGINE.GAME.keymap[ENGINE.KEY.map.F4] = false;
+    },
+    pause() {
+        if (GAME.paused) return;
+        if (GAME.levelFinished) return;
+        if (PLANE.dead) return;
+        console.log("%cGAME paused.", PRG.CSS);
+        let GameRD = new RenderData("NGage", 48, "#DDD", "text", "#000", 2, 2, 2);
+        ENGINE.TEXT.setRD(GameRD);
+        $("#pause").prop("value", "Resume Game [F4]");
+        $("#pause").off("click", GAME.pause);
+        $("#pause").on("click", GAME.resume);
+        ENGINE.GAME.ANIMATION.next(ENGINE.KEY.waitFor.bind(null, GAME.clickPause, "F4"));
+        ENGINE.TEXT.centeredText("Game Paused", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
+        GAME.paused = true;
+    },
+    resume() {
+        console.log("%cGAME resumed.", PRG.CSS);
+        $("#pause").prop("value", "Pause Game [F4]");
+        $("#pause").off("click", GAME.resume);
+        $("#pause").on("click", GAME.pause);
+        ENGINE.clearLayer("text");
+        ENGINE.GAME.ANIMATION.resetTimer();
+        ENGINE.GAME.ANIMATION.next(GAME.run);
+        GAME.paused = false;
+    },
+    respond(lapsedTime) {
+        if (PLANE.dead) return;
+        const map = ENGINE.GAME.keymap;
+
+        if (map[ENGINE.KEY.map.F4]) {
+            $("#pause").trigger("click");
+            ENGINE.GAME.keymap[ENGINE.KEY.map.F4] = false;
         }
+
+
+        if (map[ENGINE.KEY.map.right]) {
+            PLANE.lateral(RIGHT);
+            return;
+        }
+
+
+        return;
+        /*
+        var map = GAME.keymap;
+
         if (map[17]) {
             PLANE.shoot();
         }
@@ -1148,6 +1250,7 @@ const GAME = {
             return;
         }
         return;
+        */
     },
     /*clearKey(e) {
         e = e || window.event;
