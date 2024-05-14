@@ -216,15 +216,18 @@ const MAP = {
       { w: 1000, y: INI.ZERO, type: "L", inf: "airport" },
       { w: 500, y: INI.ZERO, type: "L" },
       { w: 150, y: 768, type: "Q", cp: { x: 35, y: 10, f: -1 } },
-      { w: 1000, y: 768, type: "L" }
+      { w: 1280, y: 768, type: "L" }
     ],
-    worldLength: 22280,
+    worldLength: 22560,
     airport: {
       x1: 0,
       x2: 0
     },
     mainPattern: "GrassTerrain"
   },
+
+///////////////////////////////////////////////////////////////////////////////////
+
   2: {
     world: [
       { w: INI.PLANE_LEFT, y: INI.ZERO, type: "L" },
@@ -353,6 +356,10 @@ const MAP = {
     },
     mainPattern: "GrassTerrain"
   },
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+
   3: {
     world: [
       { w: INI.PLANE_LEFT, y: INI.ZERO, type: "L" },
@@ -561,6 +568,10 @@ const MAP = {
     },
     mainPattern: "SandTerrain"
   },
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+
   4: {
     world: [
       { w: INI.PLANE_LEFT, y: INI.ZERO, type: "L" },
@@ -685,6 +696,10 @@ const MAP = {
     },
     mainPattern: "GrassTerrain"
   },
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+  
   5: {
     world: [
       { w: INI.PLANE_LEFT, y: INI.ZERO, type: "L" },

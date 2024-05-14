@@ -72,6 +72,10 @@ LoadRotated = [
   { srcName: "spitfire64.png", name: "Spitfire", rotate: { first: -30, last: 30, step: 1 }  },
 ];
 
+LoadSheetSequences = [
+  { srcName: "Explosion2.png", name: "Explosion", type: "png", count: 23 },
+];
+
 /*
 var Grass = new Tile("grass1", 128, 128, "png", "grass");
 var Sea = new Tile("sea", 128, 102, "png", "sea");

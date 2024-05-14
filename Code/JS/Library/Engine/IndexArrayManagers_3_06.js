@@ -12,7 +12,7 @@ TODO:
 */
 
 const IndexArrayManagers = {
-    VERSION: "3.05",
+    VERSION: "3.06",
     VERBOSE: false,
     DEAD_LAPSED_TIME: 5,
 };
@@ -269,7 +269,7 @@ class Destruction_Animation extends IAM {
     }
     manage(lapsedTime, map = this.map) {
         this.reIndex();
-        if (map.width && map.height) {
+        if (map?.width && map?.height) {
             map[this.IA] = new IndexArray(map.width, map.height, 4, 4);
             this.poolToIA(map[this.IA]);
         }

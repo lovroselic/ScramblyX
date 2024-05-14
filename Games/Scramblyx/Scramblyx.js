@@ -34,7 +34,7 @@ const INI = {
     PISTE_HEIGHT: 8,
     ZERO: 24,
     TOP: 680,
-    PLANE_TOP_OFFSET: 20, 
+    PLANE_TOP_OFFSET: 20,
     MOVE: 4 * 60,
     PLANE_LEFT: 40,
     PLANE_RIGHT: 600,
@@ -64,7 +64,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.01.13",
+    VERSION: "1.01.14",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -116,11 +116,9 @@ const PRG = {
         ENGINE.addBOX("DOWN", ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText"]);
         ENGINE.addBOX("LEVEL", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["level"]);
 
-        //$("#LEVEL").addClass("hidden");
-        //LAYER.level.canvas.width = INI.LEVEL_WIDTH;
+        $("#LEVEL").addClass("hidden");
 
-        ENGINE.checkIntersection = true;
-
+        //ENGINE.checkIntersection = true;
     },
 
     start() {
@@ -143,15 +141,32 @@ const PRG = {
 };
 
 ///////////////////////////////////////////////////////////////////
+
+class Explosion {
+    constructor(grid) {
+        this.grid = grid;
+        this.layer = 'explosion';
+        this.moveState = new MoveState(grid, NOWAY);
+        this.actor = new ACTOR("Explosion", grid.x, grid.y, "linear", ASSET.Explosion);
+    }
+    draw() {
+        ENGINE.spriteDraw(this.layer, this.grid.x, ENGINE.gameHEIGHT - this.grid.y, this.actor.sprite());
+        ENGINE.layersToClear.add("explosion");
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////
 const PLANE = {
     firstInit() {
         this.plane = "Spitfire";
         this.angle = 0;
         this.sprite = SPRITE[PLANE.plane + "_" + PLANE.angle];
+        this.width = PLANE.sprite.width;
+        this.height = PLANE.sprite.height;
         this.ignoreByManager = true;
 
-        this.ZERO = INI.ZERO + Math.floor(PLANE.sprite.height / 2);
-        //this.ZERO = ENGINE.gameHEIGHT - INI.ZERO - Math.floor(PLANE.sprite.height / 2);
+        this.ZERO = INI.ZERO + Math.floor(this.height / 2);
         this.TOP = INI.TOP + INI.PLANE_TOP_OFFSET;
         this.init();
         this.position();
@@ -176,12 +191,7 @@ const PLANE = {
         ENGINE.spriteDraw("plane", this.x, ENGINE.gameHEIGHT - this.y, this.sprite);
         ENGINE.layersToClear.add("plane");
     },
-    /*getY() {
-        return ENGINE.gameHEIGHT - PLANE.y;
-    },*/
-
-
-    move(dir, lapsedTime) {
+    move(dir) {
         const map = ENGINE.GAME.keymap;
         if (PLANE.landing) return;
         if (PLANE.speed < INI.MAX_SPEED && map[ENGINE.KEY.map.up]) return;
@@ -199,14 +209,7 @@ const PLANE = {
         map[ENGINE.KEY.map.up] = false;
         map[ENGINE.KEY.map.down] = false;
 
-
         PLANE.angle = PLANE.angle + dir.y * 5;
-
-        /*if (PLANE.angle < 0) PLANE.angle += 360;
-        if (PLANE.angle === 360) PLANE.angle = 0;
-        if (PLANE.angle > 30 && PLANE.angle < 320) PLANE.angle = 30;
-        else if (PLANE.angle < 330 && PLANE.angle > 40) PLANE.angle = 330;*/
-
         PLANE.angle = Math.max(PLANE.angle, -30);
         PLANE.angle = Math.min(PLANE.angle, 30);
 
@@ -218,43 +221,34 @@ const PLANE = {
     },
     collisionBackground() {
         if (PLANE.dead) return;
-    },
-
-    lateral(dir, lapsedTime) {
-        if (PLANE.landing) return;
-
-        if (PLANE.speed < INI.MAX_SPEED && !PLANE.acceleration && !GAME.levelComplete) {
-            PLANE.acceleration = true;
-            PLANE.speed = 1;
-        }
-
-        if (PLANE.landed) return;
-
-        const timeF = 1000 / lapsedTime;
-
-        PLANE.x += dir.x * INI.MOVE / timeF; //adjust to lapsedTime
-        if (PLANE.x < INI.PLANE_LEFT) PLANE.x = INI.PLANE_LEFT;
-        if (PLANE.x > INI.PLANE_RIGHT) PLANE.x = INI.PLANE_RIGHT;
-    },
-
-    /*collisions() {
-        if (PLANE.landed && GAME.x < GAME.airportLength - INI.MAX_SPEED)
-            return;
-        if (PLANE.dead)
-            return;
-        var Plane = new ACTOR(PLANE.plane, PLANE.x, PLANE.y, PLANE.angle);
-        var HTB = ENGINE.collisionToBackground(Plane, LAYER.world);
-        if (HTB) {
+        const currentX = PLANE.x + GAME.x + Math.round(PLANE.width / 4);
+        const planeBottomY = PLANE.y - Math.round(PLANE.height / 4);
+        const height = MAP[GAME.level].heightData[currentX];
+        //console.log("***", currentX, planeBottomY, height, planeBottomY <= height);
+        if (planeBottomY <= height) {
+            console.warn("collision");
             if (PLANE.airborne && PLANE.clearForlanding && PLANE.angle <= 10) {
+                console.info("plane landing");
                 PLANE.landing = true;
                 PLANE.angle = 0;
                 PLANE.y = PLANE.ZERO;
                 PLANE.airborne = false;
-            } else {
-                PLANE.die();
-            }
+            } else PLANE.die();
         }
-    },*/
+    },
+
+    lateral(dir, lapsedTime) {
+        if (PLANE.landing) return;
+        if (PLANE.speed < INI.MAX_SPEED && !PLANE.acceleration && !GAME.levelComplete) {
+            PLANE.acceleration = true;
+            PLANE.speed = 1;
+        }
+        if (PLANE.landed) return;
+        const timeF = 1000 / lapsedTime;
+        PLANE.x += dir.x * INI.MOVE / timeF;
+        if (PLANE.x < INI.PLANE_LEFT) PLANE.x = INI.PLANE_LEFT;
+        if (PLANE.x > INI.PLANE_RIGHT) PLANE.x = INI.PLANE_RIGHT;
+    },
 
     /*collisionBullet() {
         if (PLANE.landed && GAME.x < GAME.airportLength - INI.MAX_SPEED)
@@ -283,13 +277,18 @@ const PLANE = {
         }
     },*/
     die() {
+        console.log("plane dies");
+        DESTRUCTION_ANIMATION.add(new Explosion(new Grid(PLANE.x, PLANE.y)));
+        AUDIO.Explosion.play();
         PLANE.dead = true;
-        GAME.rewind = true;
+        PLANE.speed = 0;
         ENGINE.clearLayer("plane");
-        EXPLOSIONS.pool.push(new AnimationSPRITE(PLANE.x, PLANE.y, "ShipExp", 8));
         GAME.lives--;
-        if (GAME.lives <= 0)
-            GAME.over();
+    },
+    death() {
+        console.log("process completed, death, start rewind");
+        if (GAME.lives <= 0) return GAME.over(); 
+        GAME.rewind = true;
     },
     shoot() {
         if (PLANE.dead)
@@ -314,13 +313,7 @@ const PLANE = {
         }, INI.BULLET_TIMEOUT);
     },
     getDY(angle) {
-        var smer;
-        if (angle > 30) {
-            smer = -1;
-            angle = 360 - angle;
-        } else
-            smer = 1;
-        return Math.floor(smer * (angle / 5));
+        return -Math.floor(angle / 5);
     },
     dropBomb() {
         if (PLANE.dead) return;
@@ -859,29 +852,6 @@ const ENEMY = {
     }
 };
 
-/*const EXPLOSIONS = {
-    pool: [],
-    draw() {
-        ENGINE.clearLayer("explosion");
-        var PL = EXPLOSIONS.pool.length;
-        if (PL === 0)
-            return;
-        for (var instance = PL - 1; instance >= 0; instance--) {
-            var sprite = EXPLOSIONS.pool[instance].pool.shift();
-            ENGINE.spriteDraw(
-                "explosion",
-                EXPLOSIONS.pool[instance].x,
-                EXPLOSIONS.pool[instance].y,
-                SPRITE[sprite]
-            );
-            EXPLOSIONS.pool[instance].x -= PLANE.speed;
-            if (EXPLOSIONS.pool[instance].pool.length === 0) {
-                EXPLOSIONS.pool.splice(instance, 1);
-            }
-        }
-    }
-};*/
-
 const GAME = {
     setup() {
         console.info("GAME SETUP");
@@ -916,7 +886,7 @@ const GAME = {
         $(document).keyup(GAME.clearKey);
         GAME.level = 1;
         //GAME.level = 2;
-        GAME.lives = 5;
+        GAME.lives = 3;
         GAME.score = 0;
         GAME.extraLife = SCORE.extraLife.clone();
 
@@ -930,20 +900,9 @@ const GAME = {
 
         GAME.setDrawLevel(GAME.level);
         GAME.fps = new FPS_short_term_measurement(300);
-
-        PLANE.firstInit();
-
-        GAME.levelStart();
-
-        /*
-        GAME.stopAnimation = false;
-        
         GAME.ended = false;
-        GAME.initLevel(GAME.level);
-        GAME.frame = {};
-        GAME.frame.start = null;
-        GAME.firstFrameDraw();
-        GAME.run();*/
+        PLANE.firstInit();
+        GAME.levelStart();
     },
     prepareForRestart() {
         let clear = ["background", "text", "FPS", "button", "bottomText"];
@@ -951,47 +910,29 @@ const GAME = {
     },
     levelStart() {
         console.info(" - start -", GAME.level);
-
         GAME.prepareForRestart();
-
-        //
-        ENGINE.GAME.ANIMATION.stop(); //DEBUG
-        //
-
-
-
         GAME.initLevel(GAME.level);
-    },
-    stop() {
-        GAME.stopAnimation = true;
-        $(document).off("keyup", GAME.clearKey);
-        $(document).off("keydown", GAME.checkKey);
-        GAME.end();
     },
     over() {
         console.log("GAME OVER");
         ENGINE.clearLayer("text");
         TITLE.gameOver();
         GAME.ended = true;
+        GAME.end();
     },
     end() {
-        TITLE.render();
         SCORE.checkScore(GAME.score);
         SCORE.hiScore();
         TEXT.score();
-        $("#startGame").removeClass("hidden");
+    },
+    moveTo(x) {
+        GAME.x = x;
     },
     move(lapsedTime) {
-        console.info("PLANE.y", PLANE.y);
         const timeF = 1000 / lapsedTime;
-        //console.log("move", lapsedTime);
         if (PLANE.landing) {
             PLANE.speed -= INI.ACCELERATION_FACTOR / timeF;
-            if (!PLANE.clearForlanding) {
-                PLANE.die();
-                PLANE.landing = false;
-                return;
-            }
+            console.log("LANDING", PLANE.speed);
             if (PLANE.speed < 0) {
                 PLANE.speed = 0;
                 PLANE.landing = false;
@@ -1005,18 +946,15 @@ const GAME = {
             if (PLANE.speed < INI.REWIND_MAX) PLANE.speed = INI.REWIND_MAX;
             if (GAME.x <= 0) {
                 GAME.x = 0;
-                if (GAME.ended) {
-                    GAME.stop();
-                } else {
-                    PLANE.dead = false;
-                    GAME.rewind = false;
-                    PLANE.init();
-                    PLANE.position();
-                    //ENEMY.active.clear();
-                    //ENEMY.init();
-                }
+                PLANE.dead = false;
+                GAME.rewind = false;
+                PLANE.init();
+                PLANE.position();
+                //ENEMY.active.clear();
+                //ENEMY.init();
             }
         }
+
         if (PLANE.acceleration) {
             PLANE.speed += INI.ACCELERATION_FACTOR / timeF;
             if (PLANE.speed > INI.MAX_SPEED) {
@@ -1026,27 +964,13 @@ const GAME = {
         }
 
         GAME.x += Math.floor(PLANE.speed);
-        //console.log("GAME.x", GAME.x);
 
-        /** debug */
-        if (GAME.x > MAP[GAME.drawLevel].worldLength) {
-            GAME.x = MAP[GAME.drawLevel].worldLength;
-            GAME.stopAnimation = true;
-            console.error("Stopped animation at ", GAME.x);
-        }
-        /** */
-
-        if (PLANE.x + GAME.x >= MAP[GAME.drawLevel].airport.x1 && PLANE.x + GAME.x <= LEVELS[GAME.drawLevel].airport.x2) {
+        if (PLANE.x + GAME.x >= MAP[GAME.drawLevel].airport.x1 && PLANE.x + GAME.x <= MAP[GAME.drawLevel].airport.x2) {
             PLANE.clearForlanding = true;
         } else PLANE.clearForlanding = false;
 
+        PLANE.y += PLANE.getDY(PLANE.angle);
 
-        PLANE.y -= PLANE.getDY(PLANE.angle); //from +  to -
-
-        if (PLANE.y < PLANE.ZERO) {
-            PLANE.y = PLANE.ZERO;
-            PLANE.angle = 0;
-        }
         if (PLANE.y > PLANE.TOP) {
             PLANE.y = PLANE.TOP;
             PLANE.angle = 0;
@@ -1056,9 +980,23 @@ const GAME = {
     },
     run(lapsedTime) {
         if (ENGINE.GAME.stopAnimation) return;
-        GAME.respond(lapsedTime);
-        GAME.move(lapsedTime);
-        GAME.frameDraw(lapsedTime);
+
+        if (GAME.rewind) {
+            GAME.move(lapsedTime);
+            GAME.frameDraw(lapsedTime);
+        } else {
+            GAME.respond(lapsedTime);
+            GAME.move(lapsedTime);
+            PLANE.manage(lapsedTime);
+            DESTRUCTION_ANIMATION.manage(lapsedTime);
+            GAME.frameDraw(lapsedTime);
+            if (PLANE.dead) GAME.checkIfProcessesComplete();
+        }
+    },
+    checkIfProcessesComplete() {
+        if (DESTRUCTION_ANIMATION.POOL.length !== 0) return;
+        console.log("SCENE completed!");
+        PLANE.death();
     },
     /*run() {
         if (!GAME.frame.start)
@@ -1101,6 +1039,7 @@ const GAME = {
         DTP.paintVisible();
         PLANE.draw();
         TEXT.score();
+        DESTRUCTION_ANIMATION.draw(lapsedTime);
         if (DEBUG.FPS) GAME.FPS(lapsedTime);
 
 
@@ -1140,14 +1079,15 @@ const GAME = {
         TITLE.centeredText("Bonus score: " + bonus + " points", fs, y);
         y += 2 * fs;
         TITLE.centeredText("Press 'ENTER' to continue.", fs, y);
+        ENGINE.GAME.ANIMATION.next(ENGINE.KEY.waitFor.bind(null, GAME.nextLevel, "enter"));
     },
     nextLevel() {
         GAME.level++;
         GAME.setDrawLevel(GAME.level);
         ENGINE.clearLayer("text");
         console.log("Ascending to level ", GAME.level);
-        GAME.initLevel(GAME.level);
         PLANE.init();
+        GAME.initLevel(GAME.level);
     },
     async initLevel(level) {
         console.info("init level", level);
@@ -1162,6 +1102,7 @@ const GAME = {
         if (DEBUG.show_hdata) DTP.debugPaint(GAME.drawLevel, MAP, LAYER.level);
         //ENEMY.pool.clear();
         //ENEMY.init();
+        DESTRUCTION_ANIMATION.init(null);
         GAME.continueLevel(level);
     },
     continueLevel(level) {
@@ -1266,7 +1207,6 @@ const GAME = {
         return;
         */
     },
-
     setTitle() {
         const text = GAME.generateTitleText();
         const RD = new RenderData("Annie", 16, "#0E0", "bottomText");
@@ -1313,7 +1253,6 @@ const TEXT = {
         CTX.color = "#000000";
         CTX.fillStyle = "#000000";
         CTX.font = "18px Consolas";
-        //CTX.font = "14px Emulogic";
         CTX.shadowColor = "#666";
         CTX.shadowOffsetX = 1;
         CTX.shadowOffsetY = 1;
@@ -1338,8 +1277,8 @@ const TEXT = {
 const TITLE = {
     startTitle() {
         console.log("Start title");
-        if (AUDIO.Title) this.music();
-        this.render();
+        if (AUDIO.Title) TITLE.music();
+        TITLE.render();
         BACKGROUND.black();
         ENGINE.draw("background", (ENGINE.gameWIDTH - TEXTURE.Title.width) / 2, (ENGINE.gameHEIGHT - TEXTURE.Title.height) / 2, TEXTURE.Title);
         ENGINE.topCanvas = ENGINE.getCanvasName("ROOM");
@@ -1350,6 +1289,7 @@ const TITLE = {
         ENGINE.GAME.ANIMATION.next(GAME.runTitle);
     },
     render() {
+        ENGINE.clearManylayers(['sign', 'text', 'world']);
         TITLE.background();
         TITLE.title();
     },
@@ -1376,7 +1316,11 @@ const TITLE = {
         CTX.fillText(text, x, y);
     },
     gameOver() {
-        TITLE.bigText("GAME OVER", 120);
+        let GameRD = new RenderData("NGage", 56, "#DDD", "text", "#000", 2, 2, 2);
+        ENGINE.TEXT.setRD(GameRD);
+        ENGINE.TEXT.centeredText("GAME OVER", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
+        ENGINE.GAME.ANIMATION.next(ENGINE.KEY.waitFor.bind(null, TITLE.startTitle, "enter"));
+        TITLE.music();
     },
     makeGrad(CTX, x, y, w, h) {
         let grad = CTX.createLinearGradient(x, y, w, h);
@@ -1393,7 +1337,6 @@ const TITLE = {
         grad.addColorStop("1", "#EEE");
         return grad;
     },
-
     title() {
         const CTX = LAYER.title;
         const fs = 44;
