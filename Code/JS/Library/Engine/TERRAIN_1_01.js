@@ -245,8 +245,9 @@ const DTP = {
         NTREE: 8,
         NPALM: 5,
     },
-    drawLevel(level, world, CTX) {
+     async drawLevel(level, world, CTX) {
         console.log("************************************  draw level ************************************");
+        console.time("drawLevel");
         const WL = world[level].worldLength
         CTX.canvas.width = WL;
         //console.log("WL", WL);
@@ -258,11 +259,13 @@ const DTP = {
             this.drawChunk(world[level].world[q], CTX, world[level].mainPattern, world[level]);
         }
 
+        /** settings */
         world[level].heightData = Uint16Array.from(DTP.heightData);
         world[level].planeLimits = { width: WL };
-        //if (world[level].heightData.length !== WL) throw new Error("");
-        if (world[level].heightData.length !== WL) console.error("Height data incomplete");;
-        console.warn("MAP", world[level]);
+        BITMAP.level = await createImageBitmap(CTX.canvas);
+        if (world[level].heightData.length !== WL) console.error("Height data incomplete");
+        console.warn("MAP", world[level], "BITMAP", BITMAP.level);
+        console.timeEnd("drawLevel");
         console.log("************************************  END draw level ************************************");
     },
     drawChunk(chunk, CTX, mainPattern, levelPointer) {
@@ -387,9 +390,8 @@ const DTP = {
     },
     paintVisible(layer = "world", source = "level") {
         ENGINE.clearLayer(layer);
-        const CTX = LAYER[layer];
         if (GAME.x < 0) GAME.x = 0;
-        CTX.drawImage(LAYER[source].canvas, GAME.x, 0, ENGINE.gameWIDTH, ENGINE.gameHEIGHT, 0, 0, ENGINE.gameWIDTH, ENGINE.gameHEIGHT);
+        ENGINE.copyLayerFromBitmap(BITMAP[source], layer,  GAME.x, 0, ENGINE.gameWIDTH, ENGINE.gameHEIGHT);
     },
     debugPaint(level, world, CTX) {
         console.log("DEBUG PAINT");

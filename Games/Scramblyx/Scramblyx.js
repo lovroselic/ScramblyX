@@ -35,10 +35,10 @@ const INI = {
     ZERO: 24,
     TOP: 680,
     PLANE_TOP_OFFSET: 20, 
-    MOVE: 8 * 60,
+    MOVE: 4 * 60,
     PLANE_LEFT: 40,
     PLANE_RIGHT: 600,
-    MAX_SPEED: 8, // was 8
+    MAX_SPEED: 6, // was 8
     REWIND_MAX: -96,
     TREE_PADDING: 12,
     LAKE_PADDING: 10,
@@ -64,7 +64,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.01.12",
+    VERSION: "1.01.13",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -986,7 +986,6 @@ const GAME = {
         const timeF = 1000 / lapsedTime;
         //console.log("move", lapsedTime);
         if (PLANE.landing) {
-            //PLANE.speed -= 0.1; //adjust
             PLANE.speed -= INI.ACCELERATION_FACTOR / timeF;
             if (!PLANE.clearForlanding) {
                 PLANE.die();
@@ -1000,6 +999,7 @@ const GAME = {
                 GAME.endLevel();
             }
         }
+
         if (GAME.rewind) {
             PLANE.speed -= 1;
             if (PLANE.speed < INI.REWIND_MAX) PLANE.speed = INI.REWIND_MAX;
@@ -1149,7 +1149,7 @@ const GAME = {
         GAME.initLevel(GAME.level);
         PLANE.init();
     },
-    initLevel(level) {
+    async initLevel(level) {
         console.info("init level", level);
         GAME.levelComplete = false;
         GAME.shotsFired = 0;
@@ -1158,14 +1158,14 @@ const GAME = {
         GAME.bombsHit = 0;
         GAME.x = 0;
 
-        DTP.drawLevel(GAME.drawLevel, MAP, LAYER.level);
+        await DTP.drawLevel(GAME.drawLevel, MAP, LAYER.level);
         if (DEBUG.show_hdata) DTP.debugPaint(GAME.drawLevel, MAP, LAYER.level);
         //ENEMY.pool.clear();
         //ENEMY.init();
         GAME.continueLevel(level);
     },
     continueLevel(level) {
-        console.log("game continues on level", level);
+        console.log("game continues on level", level, BITMAP.level);
         GAME.levelExecute(level);
     },
     levelExecute(level) {

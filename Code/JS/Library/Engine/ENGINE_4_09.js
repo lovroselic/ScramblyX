@@ -43,7 +43,7 @@ const DownRight = new Vector(1, 1);
 const DownLeft = new Vector(-1, 1);
 
 const ENGINE = {
-  VERSION: "4.08",
+  VERSION: "4.09",
   CSS: "color: #0FA",
   INI: {
     ANIMATION_INTERVAL: 16,
@@ -251,8 +251,13 @@ const ENGINE = {
     LAYER[id] = $(`#c_${id}`)[0].getContext("2d");
   },
   copyLayer(copyFrom, copyTo, orX, orY, orW, orH) {
+    /** use copyLayerFromBitmap  */
     let CTX = LAYER[copyTo];
     CTX.drawImage(LAYER[copyFrom].canvas, orX, orY, orW, orH, 0, 0, orW, orH);
+  },
+  copyLayerFromBitmap(bitmap, copyTo, orX, orY, orW, orH) {
+    let CTX = LAYER[copyTo];
+    CTX.drawImage(bitmap, orX, orY, orW, orH, 0, 0, orW, orH);
   },
   flattenLayers(src, dest) {
     let W = LAYER[dest].canvas.width;
@@ -2811,9 +2816,10 @@ const $3D_MODEL = {};
 const LAYER = {
   PRELOAD: {}
 };
+const BITMAP = {};
 const SPRITE = {};
 const AUDIO = {};
-const TILE = {};
+const TILE = {};    //obsolete
 const ASSET = {
   convertToGrayScale(original, target, howmany = 1) {
     ASSET[target] = {};
