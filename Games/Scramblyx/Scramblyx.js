@@ -34,7 +34,8 @@ const INI = {
     PISTE_HEIGHT: 8,
     ZERO: 24,
     TOP: 680,
-    MOVE: 8,
+    PLANE_TOP_OFFSET: 20, 
+    MOVE: 8 * 60,
     PLANE_LEFT: 40,
     PLANE_RIGHT: 600,
     MAX_SPEED: 8, // was 8
@@ -63,7 +64,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.01.11",
+    VERSION: "1.01.12",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -151,7 +152,7 @@ const PLANE = {
 
         this.ZERO = INI.ZERO + Math.floor(PLANE.sprite.height / 2);
         //this.ZERO = ENGINE.gameHEIGHT - INI.ZERO - Math.floor(PLANE.sprite.height / 2);
-        this.TOP = INI.TOP + 12;
+        this.TOP = INI.TOP + INI.PLANE_TOP_OFFSET;
         this.init();
         this.position();
     },
@@ -180,35 +181,46 @@ const PLANE = {
     },*/
 
 
-    /* move(smer) {
-         if (PLANE.landing)
-             return;
-         if (PLANE.speed < INI.MAX_SPEED && GAME.keymap[38])
-             return;
-         if (PLANE.landed && GAME.keymap[40])
-             return;
-         if (PLANE.landed && GAME.keymap[38]) {
-             PLANE.landed = false;
-             PLANE.airborne = true;
-             PLANE.y -= 2;
-             PLANE.bulletReady = true;
-             PLANE.bombReady = true;
-         }
-         GAME.keymap[38] = false;
-         GAME.keymap[40] = false;
-         PLANE.angle = PLANE.angle + smer.y * 5;
-         if (PLANE.angle < 0)
-             PLANE.angle += 360;
-         if (PLANE.angle === 360)
-             PLANE.angle = 0;
-         if (PLANE.angle > 30 && PLANE.angle < 320)
-             PLANE.angle = 30;
-         else if (PLANE.angle < 330 && PLANE.angle > 40)
-             PLANE.angle = 330;
-     },*/
+    move(dir, lapsedTime) {
+        const map = ENGINE.GAME.keymap;
+        if (PLANE.landing) return;
+        if (PLANE.speed < INI.MAX_SPEED && map[ENGINE.KEY.map.up]) return;
+        if (PLANE.landed && map[ENGINE.KEY.map.down]) return;
+
+        if (PLANE.landed && map[ENGINE.KEY.map.up]) {
+            console.warn("LIFT OFF");
+            PLANE.landed = false;
+            PLANE.airborne = true;
+            PLANE.y += 2;
+            PLANE.bulletReady = true;
+            PLANE.bombReady = true;
+        }
+
+        map[ENGINE.KEY.map.up] = false;
+        map[ENGINE.KEY.map.down] = false;
 
 
-    lateral(dir) {
+        PLANE.angle = PLANE.angle + dir.y * 5;
+
+        /*if (PLANE.angle < 0) PLANE.angle += 360;
+        if (PLANE.angle === 360) PLANE.angle = 0;
+        if (PLANE.angle > 30 && PLANE.angle < 320) PLANE.angle = 30;
+        else if (PLANE.angle < 330 && PLANE.angle > 40) PLANE.angle = 330;*/
+
+        PLANE.angle = Math.max(PLANE.angle, -30);
+        PLANE.angle = Math.min(PLANE.angle, 30);
+
+        console.info("PLANE.angle", PLANE.angle);
+    },
+
+    manage(lapsedTime) {
+        this.collisionBackground();
+    },
+    collisionBackground() {
+        if (PLANE.dead) return;
+    },
+
+    lateral(dir, lapsedTime) {
         if (PLANE.landing) return;
 
         if (PLANE.speed < INI.MAX_SPEED && !PLANE.acceleration && !GAME.levelComplete) {
@@ -218,7 +230,9 @@ const PLANE = {
 
         if (PLANE.landed) return;
 
-        PLANE.x += dir.x * INI.MOVE; //adjust to lapsedTime
+        const timeF = 1000 / lapsedTime;
+
+        PLANE.x += dir.x * INI.MOVE / timeF; //adjust to lapsedTime
         if (PLANE.x < INI.PLANE_LEFT) PLANE.x = INI.PLANE_LEFT;
         if (PLANE.x > INI.PLANE_RIGHT) PLANE.x = INI.PLANE_RIGHT;
     },
@@ -241,6 +255,7 @@ const PLANE = {
             }
         }
     },*/
+
     /*collisionBullet() {
         if (PLANE.landed && GAME.x < GAME.airportLength - INI.MAX_SPEED)
             return;
@@ -898,11 +913,6 @@ const GAME = {
         ENGINE.watchVisibility(GAME.lostFocus);
         ENGINE.GAME.start(16);
 
-
-
-
-        //$("#bottom")[0].scrollIntoView();
-        //$(document).keydown(GAME.checkKey);
         $(document).keyup(GAME.clearKey);
         GAME.level = 1;
         //GAME.level = 2;
@@ -948,13 +958,7 @@ const GAME = {
         ENGINE.GAME.ANIMATION.stop(); //DEBUG
         //
 
-        const fs = 24;
-        let y = TITLE.bigText("Campaign " + GAME.level + ".", fs);
-        y += 2 * fs;
-        TITLE.centeredText("Press 'cursor right: ->' to start the engine.", fs, y);
-        setTimeout(function () {
-            ENGINE.clearLayer("text");
-        }, 5000);
+
 
         GAME.initLevel(GAME.level);
     },
@@ -1037,7 +1041,7 @@ const GAME = {
         } else PLANE.clearForlanding = false;
 
 
-        PLANE.y += PLANE.getDY(PLANE.angle);
+        PLANE.y -= PLANE.getDY(PLANE.angle); //from +  to -
 
         if (PLANE.y < PLANE.ZERO) {
             PLANE.y = PLANE.ZERO;
@@ -1167,12 +1171,25 @@ const GAME = {
     levelExecute(level) {
         console.log("level", level, "executes");
         GAME.firstFrameDraw(); //
-        //GAME.drawFirstFrame(level);
-        GAME.resume();
-        let texts = [
 
+        setTimeout(function () {
+            ENGINE.clearLayer("text");
+        }, 5000);
+
+        GAME.resume();
+
+        const fs = 24;
+        let GameRD = new RenderData("NGage", fs, "#DDD", "text", "#000", 2, 2, 2);
+        ENGINE.TEXT.setRD(GameRD);
+
+        ENGINE.TEXT.centeredText(`Campaign ${GAME.level}`, ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
+        ENGINE.TEXT.centeredText(`Press ${"\u2192"} to start the engine`, ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2 + 1.2 * fs);
+
+        let texts = [
+            "Let's shoot some bastards!",
         ];
-        //SPEECH.speak(texts.chooseRandom());
+        SPEECH.use('Princess');
+        SPEECH.speak(texts.chooseRandom());
     },
     lostFocus() {
         if (GAME.paused || false) return;
@@ -1213,13 +1230,21 @@ const GAME = {
 
         if (map[ENGINE.KEY.map.F4]) {
             $("#pause").trigger("click");
-            ENGINE.GAME.keymap[ENGINE.KEY.map.F4] = false;
+            map[ENGINE.KEY.map.F4] = false;
         }
 
 
         if (map[ENGINE.KEY.map.right]) {
-            PLANE.lateral(RIGHT);
-            return;
+            PLANE.lateral(RIGHT, lapsedTime);
+        }
+        if (map[ENGINE.KEY.map.left]) {
+            PLANE.lateral(LEFT, lapsedTime);
+        }
+        if (map[ENGINE.KEY.map.up]) {
+            PLANE.move(UP, lapsedTime);
+        }
+        if (map[ENGINE.KEY.map.down]) {
+            PLANE.move(DOWN, lapsedTime);
         }
 
 
@@ -1233,18 +1258,7 @@ const GAME = {
         if (map[32]) {
             PLANE.dropBomb();
         }
-        if (map[37]) {
-            PLANE.lateral(LEFT);
-        }
-        if (map[39]) {
-            PLANE.lateral(RIGHT);
-        }
-        if (map[38]) {
-            PLANE.move(UP);
-        }
-        if (map[40]) {
-            PLANE.move(DOWN);
-        }
+
         if (map[13] && GAME.levelComplete) {
             GAME.nextLevel();
             return;
@@ -1252,19 +1266,7 @@ const GAME = {
         return;
         */
     },
-    /*clearKey(e) {
-        e = e || window.event;
-        if (e.keyCode in GAME.keymap) {
-            GAME.keymap[e.keyCode] = false;
-        }
-    },*/
-    /*checkKey(e) {
-        e = e || window.event;
-        if (e.keyCode in GAME.keymap) {
-            GAME.keymap[e.keyCode] = true;
-            e.preventDefault();
-        }
-    },*/
+
     setTitle() {
         const text = GAME.generateTitleText();
         const RD = new RenderData("Annie", 16, "#0E0", "bottomText");
@@ -1336,6 +1338,7 @@ const TEXT = {
 const TITLE = {
     startTitle() {
         console.log("Start title");
+        if (AUDIO.Title) this.music();
         this.render();
         BACKGROUND.black();
         ENGINE.draw("background", (ENGINE.gameWIDTH - TEXTURE.Title.width) / 2, (ENGINE.gameHEIGHT - TEXTURE.Title.height) / 2, TEXTURE.Title);
@@ -1394,7 +1397,6 @@ const TITLE = {
     title() {
         const CTX = LAYER.title;
         const fs = 44;
-        //CTX.font = "44px Arcade";
         CTX.font = fs + "px NGage";
         CTX.shadowColor = "#ff3300";
         CTX.shadowOffsetX = 1;
