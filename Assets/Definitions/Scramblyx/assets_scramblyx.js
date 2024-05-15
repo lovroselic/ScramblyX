@@ -56,8 +56,6 @@ LoadSprites = [
 ];
 
 LoadRotated = [
-  //bomb
-  { srcName: "bomb1.png", count: 1, name: "Bomb", rotate: { first: 0, last: 180, step: 1 } },
   //planes
   { srcName: "Plane1.png", name: "Plane1", rotate: { first: -30, last: 30, step: 1 }  },
   { srcName: "Plane10.png", name: "Plane10", rotate: { first: -30, last: 30, step: 1 }  },
@@ -71,6 +69,11 @@ LoadRotated = [
   { srcName: "Plane8.png", name: "Plane8", rotate: { first: -30, last: 30, step: 1 }  },
   { srcName: "Plane9.png", name: "Plane9", rotate: { first: -30, last: 30, step: 1 }  },
   { srcName: "spitfire64.png", name: "Spitfire", rotate: { first: -30, last: 30, step: 1 }  },
+];
+
+LoadRotatedSheetSequences = [
+  //bomb
+  { srcName: "bomb1.png", count: 1, name: "Bomb", rotate: { first: 0, last: 90, step: 1 } },
 ];
 
 LoadSheetSequences = [

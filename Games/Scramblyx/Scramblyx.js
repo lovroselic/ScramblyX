@@ -25,6 +25,8 @@ const CONST = {
 };
 
 const INI = {
+    G: 1250,
+    A: 20,
     sprite_maxW: 300,
     sprite_maxH: 50,
     COLLISION_SAFE: 264,
@@ -38,8 +40,8 @@ const INI = {
     MOVE: 4 * 60,
     PLANE_LEFT: 40,
     PLANE_RIGHT: 600,
-    MAX_SPEED: 6, // was 8
-    REWIND_MAX: -96,
+    MAX_SPEED: 400, // pix /min ~ 6/frame
+    REWIND_MAX: -100 * 60,
     TREE_PADDING: 12,
     LAKE_PADDING: 10,
     TREE_CORRECTION: 12,
@@ -60,11 +62,11 @@ const INI = {
     SHIP_RANDOM: 300,
     LEVEL_BONUS: 100000,
     LAST_LEVEL: 5,
-    ACCELERATION_FACTOR: 0.1 * 60,
+    ACCELERATION_TO_MAX: 2 // seconds
 };
 
 const PRG = {
-    VERSION: "1.02.00",
+    VERSION: "1.02.01",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -112,7 +114,7 @@ const PRG = {
         $(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
 
         ENGINE.addBOX("TITLE", ENGINE.gameWIDTH, ENGINE.titleHEIGHT, ["title"]);
-        ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "world", "plane", "bullets", "explosion", "text", "FPS", "sign", "debug", "button"]);
+        ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "world", "plane", "actors", "explosion", "text", "FPS", "sign", "debug", "button"]);
         ENGINE.addBOX("DOWN", ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText"]);
         ENGINE.addBOX("LEVEL", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["level"]);
 
@@ -155,8 +157,114 @@ class Explosion {
     }
 }
 
+class GeneralBallisticObject {
+    constructor(position, dir, speed, gameX = GAME.x) {
+        this.position = position;
+        this.dir = dir;
+        this.speed = speed;
+        this.gameX = gameX;
+    }
+    explode() {
+        DESTRUCTION_ANIMATION.add(new Explosion(this.position));
+        AUDIO.Explosion.play();
+    }
+    collisionBackground(map) {
+
+        /*
+        let X = Math.round(this.position.x);
+        let planePosition = map.getPosition();
+        if (X < 0 || X - planePosition < -48 || X > planePosition + ENGINE.gameWIDTH || X >= map.DATA.map.length - 1) {
+            PROFILE_BALLISTIC.remove(this.id);
+            return;
+        }
+        let backgroundHeight = map.DATA.map[X];
+        if (Math.round(this.position.y) > backgroundHeight) {
+            PROFILE_BALLISTIC.remove(this.id);
+            this.explode();
+        }
+        */
+    }
+    collisionEntity(map) {
+
+        /*
+        let X = Math.round(this.position.x);
+        let IA = map.profile_actor_IA;
+        let ids = IA.unroll(new Grid(X, 0));
+        if (ids.length) {
+            for (let id of ids) {
+                let obj = PROFILE_ACTORS.show(id);
+                if (obj !== null && obj.checkHit(this)) {
+                    PROFILE_BALLISTIC.remove(this.id);
+                    if (id !== HERO.id) PROFILE_ACTORS.remove(id);
+                    obj.explode(this.damage);
+                    GAME.addScore(obj.score);
+                }
+            }
+        }*/
+
+    }
+    adjustPosition(ref = GAME.x) {
+        const dX = ref - this.gameX;
+        this.position.x -= dX;
+        this.gameX = ref;
+    }
+    checkVisibility() {
+        if (this.position.x < 0) PROFILE_BALLISTIC.remove(this.id);
+    }
+    draw() {
+        console.log("draw", this, this.getSprite());
+        ENGINE.spriteDraw('actors', this.position.x, ENGINE.gameHEIGHT - this.position.y, this.getSprite()); //adjust to GAME.x and ENG.height!!!
+        ENGINE.layersToClear.add("actors");
+    }
+}
+
+class Bomb extends GeneralBallisticObject {
+    constructor(position, dir, speed) {
+        super(position, dir, speed);
+        this.actor = new Rotating_ACTOR('Bomb');
+        this.name = 'Bomb';
+        this.rotSpeed = 2 / 16;
+        this.setAngle(0.0);
+    }
+    setAngle(a) {
+        this.angle = Math.min(a, 90.0);
+        console.warn(this.angle, this.actor.angle);
+    }
+    addAngle(a) {
+        let A = this.angle + a;
+        this.setAngle(A);
+    }
+    rotate(lapsedTime) {
+        this.addAngle(lapsedTime * this.rotSpeed);
+    }
+    move(lapsedTime) {
+        console.log("move bomb", this);
+        this.adjustPosition();
+        let timeDelta = lapsedTime / 1000;
+
+
+        this.checkVisibility();
+        /*
+        let timeDelta = lapsedTime / 1000;
+        let x = this.speed.x * this.dir.x * timeDelta;
+        let y = this.speed.y * this.dir.y * timeDelta;
+        this.position = this.position.add(new FP_Vector(x, y));
+        this.rotate(lapsedTime);
+        this.speed.y = this.speed.y + INI.G * timeDelta;
+        this.speed.x = Math.max(0, this.speed.x - INI.A * timeDelta);
+
+        if (this.position.x - MAP[GAME.level].map.planes[0].getPosition() < 0) {
+            PROFILE_BALLISTIC.remove(this.id);
+        }
+        */
+    }
+    getSprite() {
+        return this.actor.sprite();
+    }
+}
 
 ///////////////////////////////////////////////////////////////////
+
 const PLANE = {
     firstInit() {
         this.plane = "Spitfire";
@@ -221,10 +329,8 @@ const PLANE = {
         this.motorRate();
     },
     motorRate() {
-        //let rate = 0.5 * (INI.MAX_SPEED - PLANE.speed) / INI.MAX_SPEED;
         let rate = 1.0 * (1 - ((INI.MAX_SPEED - PLANE.speed) / INI.MAX_SPEED));
         AUDIO.PlaneMotor.playbackRate = 0.5 + rate;
-        console.log(AUDIO.PlaneMotor.playbackRate, "rate", rate, "PLANE.speed", PLANE.speed);
 
     },
     collisionBackground() {
@@ -328,28 +434,23 @@ const PLANE = {
     getDY(angle) {
         return -Math.floor(angle / 5);
     },
+
     dropBomb() {
         if (PLANE.dead) return;
         if (!PLANE.airborne) return;
         if (!PLANE.bombReady) return;
         PLANE.bombReady = false;
 
-        var x = PLANE.x + Math.floor(PLANE.sprite.width * 0.6);
-        var vx = Math.floor(PLANE.speed * Math.cos(PLANE.angle * Math.PI / 180));
-        var vy2 = Math.floor(PLANE.speed * Math.sin(PLANE.angle * Math.PI / 180));
-        var vy1 = PLANE.getDY(PLANE.angle);
-        var vy = vy1 + vy2;
-        if (vy < 0)
-            vy = 0;
-        var y = PLANE.y + vy + Math.floor(PLANE.sprite.height * 0.6);
-        var angle = PLANE.angle;
-        if (angle > 320) {
-            let temp = (360 - angle) / 10;
-            y -= Math.pow(2, temp);
-        }
-        if (angle > 90)
-            angle = 0;
-        BOMBS.pool.push(new BulletClass(x, y, vx, vy, angle));
+        //position
+        let bombX = PLANE.x + Math.floor(PLANE.width * 0.6);
+        let bombY = PLANE.y - Math.floor(PLANE.height * 0.8)
+
+        //
+        let bomb = new FP_Grid(bombX, bombY);
+        let dir = new FP_Vector(1, 1);
+        let speed = new FP_Vector(INI.MAX_SPEED, 0);
+        console.log("dropping bomb", bomb, speed, dir);
+        PROFILE_BALLISTIC.add(new Bomb(bomb, dir, speed));
         GAME.bombsDroped++;
 
         setTimeout(function () {
@@ -408,7 +509,7 @@ const BOMBS = {
         for (var q = LN - 1; q >= 0; q--) {
             spriteName = "bomb_" + BOMBS.pool[q].angle;
             ENGINE.spriteDraw(
-                "bullets",
+                "actors",
                 BOMBS.pool[q].x,
                 BOMBS.pool[q].y,
                 SPRITE[spriteName]
@@ -491,7 +592,7 @@ const BULLETS = {
         var LN = BULLETS.pool.length;
         for (var q = LN - 1; q >= 0; q--) {
             ENGINE.spriteDraw(
-                "bullets",
+                "actors",
                 BULLETS.pool[q].x,
                 BULLETS.pool[q].y,
                 SPRITE.bullet
@@ -897,6 +998,9 @@ const GAME = {
         ENGINE.GAME.start(16);
 
         $(document).keyup(GAME.clearKey);
+
+        GAME.bombsDroped = 0;
+
         GAME.level = 1;
         //GAME.level = 2;
         GAME.lives = 3;
@@ -942,9 +1046,10 @@ const GAME = {
         GAME.x = x;
     },
     move(lapsedTime) {
-        const timeF = 1000 / lapsedTime;
+        const timeDelta = lapsedTime/1000;
+        const speedchange = INI.MAX_SPEED * timeDelta / INI.ACCELERATION_TO_MAX;
         if (PLANE.landing) {
-            PLANE.speed -= INI.ACCELERATION_FACTOR / timeF;
+            PLANE.speed -= speedchange;
             console.log("LANDING", PLANE.speed);
             if (PLANE.speed < 0) {
                 PLANE.speed = 0;
@@ -955,7 +1060,7 @@ const GAME = {
         }
 
         if (GAME.rewind) {
-            PLANE.speed -= 1;
+            PLANE.speed -= 60;
             if (PLANE.speed < INI.REWIND_MAX) PLANE.speed = INI.REWIND_MAX;
             if (GAME.x <= 0) {
                 GAME.x = 0;
@@ -969,14 +1074,14 @@ const GAME = {
         }
 
         if (PLANE.acceleration) {
-            PLANE.speed += INI.ACCELERATION_FACTOR / timeF;
+            PLANE.speed += speedchange;
             if (PLANE.speed > INI.MAX_SPEED) {
                 PLANE.speed = INI.MAX_SPEED;
                 PLANE.acceleration = false;
             }
         }
 
-        GAME.x += Math.floor(PLANE.speed);
+        GAME.x += Math.floor(PLANE.speed * timeDelta);
 
         if (PLANE.x + GAME.x >= MAP[GAME.drawLevel].airport.x1 && PLANE.x + GAME.x <= MAP[GAME.drawLevel].airport.x2) {
             PLANE.clearForlanding = true;
@@ -1002,6 +1107,7 @@ const GAME = {
             GAME.move(lapsedTime);
             PLANE.manage(lapsedTime);
             DESTRUCTION_ANIMATION.manage(lapsedTime);
+            PROFILE_BALLISTIC.manage(lapsedTime);
             GAME.frameDraw(lapsedTime);
             if (PLANE.dead) GAME.checkIfProcessesComplete();
         }
@@ -1053,6 +1159,7 @@ const GAME = {
         PLANE.draw();
         TEXT.score();
         DESTRUCTION_ANIMATION.draw(lapsedTime);
+        PROFILE_BALLISTIC.draw(lapsedTime);
         if (DEBUG.FPS) GAME.FPS(lapsedTime);
 
 
@@ -1061,7 +1168,7 @@ const GAME = {
         ENGINE.clearLayer("plane");
         PLANE.draw();
         ENEMY.draw();
-        ENGINE.clearLayer("bullets");
+        ENGINE.clearLayer("actors");
         BULLETS.draw();
         BOMBS.draw();
         TEXT.score();*/
@@ -1116,6 +1223,7 @@ const GAME = {
         //ENEMY.pool.clear();
         //ENEMY.init();
         DESTRUCTION_ANIMATION.init(null);
+        PROFILE_BALLISTIC.init(null);
         GAME.continueLevel(level);
     },
     continueLevel(level) {
@@ -1200,6 +1308,9 @@ const GAME = {
         }
         if (map[ENGINE.KEY.map.down]) {
             PLANE.move(DOWN, lapsedTime);
+        }
+        if (map[ENGINE.KEY.map.space]) {
+            PLANE.dropBomb();
         }
 
 

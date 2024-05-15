@@ -3011,6 +3011,7 @@ class Rotating_ACTOR extends ACTOR {
     this.angle = angle;
   }
   sprite() {
+    console.info(`${this.name}_${this.angle}`, this.name, this.angle);
     return SPRITE[`${this.name}_${this.angle}`];
   }
 }
