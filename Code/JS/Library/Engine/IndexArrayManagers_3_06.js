@@ -274,10 +274,13 @@ class Destruction_Animation extends IAM {
             this.poolToIA(map[this.IA]);
         }
         for (const anim of this.POOL) {
+            if (!anim) continue;
             anim.actor.updateAnimation(lapsedTime);
             if (anim.actor.animationThrough) {
                 this.remove(anim.id);
             }
+            if (!anim) continue;
+            if (anim.movable) anim.move();
         }
     }
 }
