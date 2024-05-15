@@ -64,7 +64,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.01.14",
+    VERSION: "1.02.00",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -218,6 +218,14 @@ const PLANE = {
 
     manage(lapsedTime) {
         this.collisionBackground();
+        this.motorRate();
+    },
+    motorRate() {
+        //let rate = 0.5 * (INI.MAX_SPEED - PLANE.speed) / INI.MAX_SPEED;
+        let rate = 1.0 * (1 - ((INI.MAX_SPEED - PLANE.speed) / INI.MAX_SPEED));
+        AUDIO.PlaneMotor.playbackRate = 0.5 + rate;
+        console.log(AUDIO.PlaneMotor.playbackRate, "rate", rate, "PLANE.speed", PLANE.speed);
+
     },
     collisionBackground() {
         if (PLANE.dead) return;
@@ -242,6 +250,10 @@ const PLANE = {
         if (PLANE.speed < INI.MAX_SPEED && !PLANE.acceleration && !GAME.levelComplete) {
             PLANE.acceleration = true;
             PLANE.speed = 1;
+            AUDIO.PlaneMotor.loop = true;
+            AUDIO.PlaneMotor.playbackRate = 0.5;
+            AUDIO.PlaneMotor.play();
+
         }
         if (PLANE.landed) return;
         const timeF = 1000 / lapsedTime;
@@ -280,6 +292,7 @@ const PLANE = {
         console.log("plane dies");
         DESTRUCTION_ANIMATION.add(new Explosion(new Grid(PLANE.x, PLANE.y)));
         AUDIO.Explosion.play();
+        AUDIO.PlaneMotor.stop();
         PLANE.dead = true;
         PLANE.speed = 0;
         ENGINE.clearLayer("plane");
@@ -287,7 +300,7 @@ const PLANE = {
     },
     death() {
         console.log("process completed, death, start rewind");
-        if (GAME.lives <= 0) return GAME.over(); 
+        if (GAME.lives <= 0) return GAME.over();
         GAME.rewind = true;
     },
     shoot() {
@@ -1128,6 +1141,7 @@ const GAME = {
 
         let texts = [
             "Let's shoot some bastards!",
+            "Are you ready to spit some fire?",
         ];
         SPEECH.use('Princess');
         SPEECH.speak(texts.chooseRandom());

@@ -24,7 +24,8 @@ LoadTextures = [
 ];
 LoadAudio = [
   { srcName: "Explosion1.mp3", name: "Explosion" },
-  { srcName: "Immaculate Deception - LaughingSkull.mp3", name: "Title" }
+  { srcName: "Immaculate Deception - LaughingSkull.mp3", name: "Title" },
+  { srcName: "PlaneMotor.mp3", name: "PlaneMotor" }
 ];
 
 LoadSprites = [
