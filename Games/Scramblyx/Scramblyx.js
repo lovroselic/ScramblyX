@@ -2,7 +2,7 @@
 /*
  to do:
  known bugs: 
- - shoot through top of the mountain 
+
  
  */
 /////////////debug vars/////////////////////
@@ -68,7 +68,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.02.04",
+    VERSION: "1.02.05",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -394,11 +394,16 @@ const PLANE = {
         this.TOP = INI.TOP + INI.PLANE_TOP_OFFSET;
         this.init();
         this.position();
+        this.actor = new ACTOR("Spitfire_0");                               //IAM compatibility
+    },
+    updateMS() {
+        this.moveState = new MoveState(new Grid(this.x, this.y), NOWAY);    //IAM compatibility
     },
     position() {
         this.y = this.ZERO;
         this.x = Math.floor(this.sprite.width / 2) + INI.PLANE_LEFT;
         this.angle = 0;
+        this.updateMS();
     },
     init() {
         this.sprite = SPRITE[PLANE.plane + "_" + PLANE.angle];
@@ -443,6 +448,7 @@ const PLANE = {
     manage(lapsedTime) {
         this.collisionBackground();
         this.motorRate();
+        this.updateMS();
     },
     motorRate() {
         let rate = 1.0 * (1 - ((INI.MAX_SPEED - PLANE.speed) / INI.MAX_SPEED));
@@ -970,7 +976,7 @@ const GAME = {
         console.info(" - start -", GAME.level);
         GAME.prepareForRestart();
         PROFILE_ACTORS.init(MAP[GAME.level]);
-        //PROFILE_ACTORS.add(PLANE);
+        PROFILE_ACTORS.add(PLANE);
         console.log("PROFILE_ACTORS", PROFILE_ACTORS);
         GAME.initLevel(GAME.level);
     },
