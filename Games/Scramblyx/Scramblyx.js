@@ -64,10 +64,11 @@ const INI = {
     LAST_LEVEL: 5,
     ACCELERATION_TO_MAX: 2, // seconds
     LEFT_SPRITE_TOLERANCE_OFFSET: 32,
+    //NTANK:8,
 };
 
 const PRG = {
-    VERSION: "1.02.03",
+    VERSION: "1.02.04",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -185,6 +186,13 @@ class SmokeExplosion extends GeneralDestruction {
     }
 }
 
+class SmallExplosion extends GeneralDestruction {
+    constructor(grid) {
+        super(grid);
+        this.actor = new ACTOR("SmallShortExplosion", grid.x, grid.y, "linear", ASSET.SmallShortExplosion);
+    }
+}
+
 class GeneralBallisticObject {
     constructor(position, dir, speed, gameX = GAME.x) {
         this.position = position;
@@ -245,6 +253,7 @@ class Bomb extends GeneralBallisticObject {
         this.name = 'Bomb';
         this.rotSpeed = 2 / 16;
         this.setAngle(0.0);
+        this.damage = 1000;
     }
     setAngle(a) {
         this.angle = Math.min(a, 90.0);
@@ -275,6 +284,7 @@ class Ballistic extends GeneralBallisticObject {
         super(position, dir, speed);
         this.actor = new ACTOR('Bullet');
         this.name = 'Bullet';
+        this.damage = 1;
     }
     getSprite() {
         return SPRITE.Bullet;
@@ -292,6 +302,84 @@ class Ballistic extends GeneralBallisticObject {
     }
 }
 
+class Enemy {
+    constructor(position, sprite_class, gameX = GAME.x) {
+        this.position = position;
+        this.sprite_class = sprite_class;
+        this.readyToShoot = false;
+        this.gameX = gameX;
+    }
+    collisionBackground() { }
+    collisionToActors() { }
+    move() {
+        this.adjustPosition();
+        this.checkVisibility();
+    }
+    draw() {
+        if (this.position.x > ENGINE.gameWIDTH + INI.LEFT_SPRITE_TOLERANCE_OFFSET) return;
+        ENGINE.spriteDraw('actors', this.position.x, ENGINE.gameHEIGHT - this.position.y, this.getSprite());
+        ENGINE.layersToClear.add("actors");
+    }
+    adjustPosition(ref = GAME.x) {
+        const dX = ref - this.gameX;
+        this.position.x -= dX;
+        this.gameX = ref;
+    }
+    checkVisibility() {
+        if (this.position.x < -INI.LEFT_SPRITE_TOLERANCE_OFFSET) PROFILE_ACTORS.remove(this.id);
+    }
+    getSprite() {
+        return SPRITE[this.sprite_class];
+    }
+}
+
+class Tank extends Enemy {
+    constructor(position, sprite_class) {
+        super(position, sprite_class);
+        this.realLives = 3;
+        this.lives = this.realLives;
+        this.moves = false;
+        this.canShoot = false;
+        this.hunts = false;
+        this.actor = new ACTOR(this.sprite_class);
+        this.moveState = new MoveState(position, NOWAY);
+    }
+}
+
+class Ship extends Enemy {
+    constructor(position, sprite_class) {
+        super(position, sprite_class);
+        this.realLives = 1;
+        this.lives = this.realLives;
+        this.moves = false;
+        this.readyToShoot = true;
+        this.canShoot = true;
+        this.hunts = false;
+    }
+}
+
+class Aeroplane extends Enemy {
+    constructor(position, sprite_class) {
+        super(position, sprite_class);
+        this.realLives = 1;
+        this.lives = this.realLives;
+        this.moves = true;
+        this.canShoot = true;
+        this.hunts = true;
+    }
+}
+
+class Zeppelin extends Enemy {
+    constructor(position, sprite_class) {
+        super(position, sprite_class);
+        this.realLives = 3;
+        this.lives = this.realLives;
+        this.moves = true;
+        this.canShoot = false;
+        this.hunts = false;
+    }
+}
+
 ///////////////////////////////////////////////////////////////////
 
 const PLANE = {
@@ -302,7 +390,6 @@ const PLANE = {
         this.width = PLANE.sprite.width;
         this.height = PLANE.sprite.height;
         this.ignoreByManager = true;
-
         this.ZERO = INI.ZERO + Math.floor(this.height / 2);
         this.TOP = INI.TOP + INI.PLANE_TOP_OFFSET;
         this.init();
@@ -455,7 +542,7 @@ const PLANE = {
         let speed = new FP_Vector(INI.BULLET_SPEED, INI.BULLET_SPEED);
         PROFILE_BALLISTIC.add(new Ballistic(bullet, planeDirection, speed));
         AUDIO.Shoot.play();
- 
+
         GAME.shotsFired++;
         setTimeout(function () {
             PLANE.bulletReady = true;
@@ -474,12 +561,12 @@ const PLANE = {
         PLANE.bombReady = false;
 
         let planeDirection = PLANE.getDirection();
-        planeDirection.y = Math.min(0, planeDirection.y);   //just down
+        planeDirection.y = Math.min(0, planeDirection.y);       //just down
         let plane = this.getPlane();
         let bomb = plane.add(planeDirection, PLANE.width * 0.6);
-        bomb.y -= PLANE.height * 0.6;                       //more down
-        let dir = new FP_Vector(1, -1);                     //game coordinates!!
-        let speed = new FP_Vector(INI.MAX_SPEED, 0);        //in pixels per second
+        bomb.y -= PLANE.height * 0.6;                           //more down
+        let dir = new FP_Vector(1, -1);                         //game coordinates!!
+        let speed = new FP_Vector(INI.MAX_SPEED, 0);            //in pixels per second
         console.log("dropping bomb", bomb, speed, dir);
         PROFILE_BALLISTIC.add(new Bomb(bomb, dir, speed));
         GAME.bombsDroped++;
@@ -487,148 +574,6 @@ const PLANE = {
         setTimeout(function () {
             PLANE.bombReady = true;
         }, INI.BOMB_TIMEOUT);
-    }
-};
-
-var BulletClass = function (x, y, vx, vy, angle) {
-    this.x = x;
-    this.y = y;
-    this.vx = vx;
-    this.vy = vy;
-    this.angle = angle;
-    this.prevX = null;
-    this.prevY = null;
-};
-
-const BOMBS = {
-    pool: [],
-    move() {
-        var LN = BOMBS.pool.length;
-        var angle, calcAngle;
-        for (var q = LN - 1; q >= 0; q--) {
-            calcAngle =
-                90 - Math.atan(BOMBS.pool[q].vx / BOMBS.pool[q].vy) * 180 / Math.PI;
-            calcAngle = Math.round(calcAngle / 5) * 5;
-            if (calcAngle > BOMBS.pool[q].angle)
-                BOMBS.pool[q].angle += 5;
-            if (BOMBS.pool[q].angle > 90)
-                BOMBS.pool[q].angle = 90;
-            BOMBS.pool[q].vx -= 0.35;
-            if (BOMBS.pool[q].vx < 0)
-                BOMBS.pool[q].vx = 0;
-            BOMBS.pool[q].vy += 1;
-            if (BOMBS.pool[q].vy > INI.BOMB_GRAVITY_SPEED)
-                BOMBS.pool[q].vy = INI.BOMB_GRAVITY_SPEED;
-            BOMBS.pool[q].x += Math.floor(BOMBS.pool[q].vx);
-            BOMBS.pool[q].y += BOMBS.pool[q].vy;
-            if (GAME.rewind) {
-                BOMBS.pool[q].x -= PLANE.speed;
-            }
-            if (BOMBS.pool[q].x < 0 || BOMBS.pool[q].x > ENGINE.gameWIDTH) {
-                BOMBS.remove(q);
-                continue;
-            }
-        }
-    },
-    remove(x) {
-        BOMBS.pool.splice(x, 1);
-        return;
-    },
-    draw() {
-        var LN = BOMBS.pool.length;
-        var spriteName;
-        for (var q = LN - 1; q >= 0; q--) {
-            spriteName = "bomb_" + BOMBS.pool[q].angle;
-            ENGINE.spriteDraw(
-                "actors",
-                BOMBS.pool[q].x,
-                BOMBS.pool[q].y,
-                SPRITE[spriteName]
-            );
-        }
-    },
-    collisionToBackground() {
-        var LN = BOMBS.pool.length;
-        if (LN === 0)
-            return;
-        var HTB;
-        for (var q = LN - 1; q >= 0; q--) {
-            var bomb = new ACTOR(
-                "bomb",
-                BOMBS.pool[q].x,
-                BOMBS.pool[q].y,
-                BOMBS.pool[q].angle
-            );
-            HTB = ENGINE.collisionToBackground(bomb, LAYER.world);
-            if (HTB) {
-                EXPLOSIONS.pool.push(
-                    new AnimationSPRITE(BOMBS.pool[q].x, BOMBS.pool[q].y, "AstExp", 12)
-                );
-                BOMBS.remove(q);
-            }
-        }
-    }
-};
-const BULLETS = {
-    pool: [],
-    move() {
-        var LN = BULLETS.pool.length;
-        if (LN === 0)
-            return;
-        for (var q = LN - 1; q >= 0; q--) {
-            BULLETS.pool[q].prevX = BULLETS.pool[q].x;
-            BULLETS.pool[q].prevY = BULLETS.pool[q].y;
-            BULLETS.pool[q].x += BULLETS.pool[q].vx;
-            BULLETS.pool[q].y += BULLETS.pool[q].vy;
-
-            if (GAME.rewind && BULLETS.pool[q].vx > 0) {
-                BULLETS.pool[q].x -= PLANE.speed;
-            }
-
-            if (BULLETS.pool[q].x < 0 || BULLETS.pool[q].x > ENGINE.gameWIDTH) {
-                BULLETS.remove(q);
-                continue;
-            }
-            if (BULLETS.pool[q].y < 0 || BULLETS.pool[q].y > INI.GAME_HEIGHT) {
-                BULLETS.remove(q);
-                continue;
-            }
-        }
-    },
-    remove(x) {
-        BULLETS.pool.splice(x, 1);
-        return;
-    },
-    collisionToBackground() {
-        var LN = BULLETS.pool.length;
-        if (LN === 0)
-            return;
-        var HTB;
-        for (var q = LN - 1; q >= 0; q--) {
-            var blt = new ACTOR(
-                "bullet",
-                BULLETS.pool[q].x,
-                BULLETS.pool[q].y,
-                0,
-                BULLETS.pool[q].prevX,
-                BULLETS.pool[q].prevY
-            );
-            HTB = ENGINE.collisionToBackground(blt, LAYER.world);
-            if (HTB) {
-                BULLETS.remove(q);
-            }
-        }
-    },
-    draw() {
-        var LN = BULLETS.pool.length;
-        for (var q = LN - 1; q >= 0; q--) {
-            ENGINE.spriteDraw(
-                "actors",
-                BULLETS.pool[q].x,
-                BULLETS.pool[q].y,
-                SPRITE.bullet
-            );
-        }
     }
 };
 
@@ -652,11 +597,8 @@ const BACKGROUND = {
 };
 
 
-class Enemy {
-    constructor(position) {
-        this.position = position;
-    }
-}
+
+
 /*
 var ENEMY_ACTOR = function (
     sprite_class,
@@ -683,7 +625,7 @@ var ENEMY_ACTOR = function (
     this.realLives = realLives || 1;
     this.lives = realLives || 1;
     this.readyToShoot = false;
-
+ 
     if (type === "ship")
         this.readyToShoot = true;
     if (type === "plane") {
@@ -1027,6 +969,9 @@ const GAME = {
     levelStart() {
         console.info(" - start -", GAME.level);
         GAME.prepareForRestart();
+        PROFILE_ACTORS.init(MAP[GAME.level]);
+        //PROFILE_ACTORS.add(PLANE);
+        console.log("PROFILE_ACTORS", PROFILE_ACTORS);
         GAME.initLevel(GAME.level);
     },
     over() {
@@ -1107,6 +1052,7 @@ const GAME = {
             PLANE.manage(lapsedTime);
             DESTRUCTION_ANIMATION.manage(lapsedTime);
             PROFILE_BALLISTIC.manage(lapsedTime);
+            PROFILE_ACTORS.manage(lapsedTime);
             GAME.frameDraw(lapsedTime);
             if (PLANE.dead) GAME.checkIfProcessesComplete();
         }
@@ -1159,6 +1105,7 @@ const GAME = {
         TEXT.score();
         DESTRUCTION_ANIMATION.draw(lapsedTime);
         PROFILE_BALLISTIC.draw(lapsedTime);
+        PROFILE_ACTORS.draw(lapsedTime);
         if (DEBUG.FPS) GAME.FPS(lapsedTime);
 
 
@@ -1223,6 +1170,8 @@ const GAME = {
         //ENEMY.init();
         DESTRUCTION_ANIMATION.init(null);
         PROFILE_BALLISTIC.init(MAP[level]);
+        //PROFILE_ACTORS.init(MAP[level]);
+        //PROFILE_ACTORS.add(PLANE);
         GAME.continueLevel(level);
     },
     continueLevel(level) {
@@ -1319,14 +1268,14 @@ const GAME = {
         return;
         /*
         var map = GAME.keymap;
-
+ 
         if (map[17]) {
             PLANE.shoot();
         }
         if (map[32]) {
             PLANE.dropBomb();
         }
-
+ 
         if (map[13] && GAME.levelComplete) {
             GAME.nextLevel();
             return;

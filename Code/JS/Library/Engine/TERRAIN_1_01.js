@@ -4,6 +4,11 @@
 /*jshint -W061 */
 "use strict";
 
+/**
+ * 
+ * DTP spawns to PROFILE_ACTORS
+ */
+
 class PlaneLimits {
     constructor(width = null, wawelength = 64, drawMaxHeight = null, drawMinHeight = null, open = false, leftStop = 0, rightStop = null) {
         if (width === null || drawMaxHeight === null || drawMinHeight === null) {
@@ -21,6 +26,7 @@ class PlaneLimits {
         this.amp = this.drawMaxHeight - this.drawMinHeight;
     }
 }
+
 class Plane {
     constructor(map = null, planeLimits = null, layer = null, texture = null, speedFactor = null, color = "#000") {
         if (map === null || layer === null || texture === null || speedFactor === null) {
@@ -48,6 +54,7 @@ class Plane {
         this.position += this.moved;
     }
 }
+
 class Parallax {
     constructor(planes) {
         this.planes = planes;
@@ -58,6 +65,7 @@ class Parallax {
         }
     }
 }
+
 class PSNG {
     constructor() {
         this.M = 4294967296;
@@ -70,6 +78,7 @@ class PSNG {
         return this.Z / this.M - 0.5;
     }
 }
+
 class PerlinNoise {
     constructor(planeLimits, divisor = 1) {
         this.planeLimits = planeLimits;
@@ -113,6 +122,7 @@ class PerlinNoise {
         return Uint16Array.from(this.pos.map(x => Math.round(x + this.planeLimits.mid)));
     }
 }
+
 const PERLIN = {
     INI: {
         divisor_base: 2,
@@ -180,6 +190,7 @@ const PERLIN = {
         return Uint16Array.from(noise.map(x => x + planeLimits.mid));
     }
 };
+
 const TERRAIN = {
     VERSION: "1.01",
     CSS: "color: #2ACBE8",
@@ -233,7 +244,6 @@ const TERRAIN = {
 
 /** Deterministic Terrain Parser */
 
-
 const DTP = {
     x: null,
     y: null,
@@ -244,8 +254,9 @@ const DTP = {
     INI: {
         NTREE: 8,
         NPALM: 5,
+        NTANK: 6,
     },
-     async drawLevel(level, world, CTX) {
+    async drawLevel(level, world, CTX) {
         console.log("************************************  draw level ************************************");
         console.time("drawLevel");
         const WL = world[level].worldLength
@@ -262,6 +273,7 @@ const DTP = {
         /** settings */
         world[level].heightData = Uint16Array.from(DTP.heightData);
         world[level].planeLimits = { width: WL };
+        world[level].DATA = { map: { length: WL } };               //compatibility with PROFILE_ACTORS
         BITMAP.level = await createImageBitmap(CTX.canvas);
         if (world[level].heightData.length !== WL) console.error("Height data incomplete");
         console.warn("MAP", world[level], "BITMAP", BITMAP.level);
@@ -373,6 +385,21 @@ const DTP = {
                 break;
         }
 
+        /** spawning, game coorindates! */
+        let ax, ay, sName;
+        switch (chunk.enemy) {
+            case "tank":
+                sName = `tank${RND(1, DTP.INI.NTANK)}`;
+                ax = DTP.x + Math.floor(chunk.w / 2);
+                ay = chunk.y + Math.floor(SPRITE[sName].height / 2);
+                let tank = new Tank(new Grid(ax, ay), sName);
+                PROFILE_ACTORS.add(tank);
+                break;
+
+            default:
+                break;
+        }
+
 
         /** ready for next chunk */
         DTP.x += chunk.w;
@@ -391,7 +418,7 @@ const DTP = {
     paintVisible(layer = "world", source = "level") {
         ENGINE.clearLayer(layer);
         if (GAME.x < 0) GAME.x = 0;
-        ENGINE.copyLayerFromBitmap(BITMAP[source], layer,  GAME.x, 0, ENGINE.gameWIDTH, ENGINE.gameHEIGHT);
+        ENGINE.copyLayerFromBitmap(BITMAP[source], layer, GAME.x, 0, ENGINE.gameWIDTH, ENGINE.gameHEIGHT);
     },
     debugPaint(level, world, CTX) {
         console.log("DEBUG PAINT");

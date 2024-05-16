@@ -81,8 +81,7 @@ LoadRotatedSheetSequences = [
 
 LoadSheetSequences = [
   { srcName: "Explosion64.png", count: 24, name: "Explosion" },
-  //{ srcName: "SmallShortExplosion64.png", count: 6, name: "SmallShortExplosion" },
-  //{ srcName: "SmokeExp64.png", count: 27, name: "Smoke" },
+  { srcName: "SmallShortExplosion64.png", count: 6, name: "SmallShortExplosion" },
   { srcName: "Smoke2.png", count: 12, name: "Smoke" }
 ];
 
