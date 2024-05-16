@@ -22,6 +22,8 @@ changelog:
 4.01: Area, RectArea consolidated and removed from ENGINE
 4.02: Point.coClass bug corrected
       Point as extension of masterGrid class
+      Angle.getDirectionVector
+      Vector.mul bug corrected
 
 */
 
@@ -687,8 +689,8 @@ class FP_Vector extends MasterVectorClass {
   sub(vector, factor = 1.0) {
     return new FP_Vector(this.x - vector.x * factor, this.y - vector.y * factor);
   }
-  mul(vector, num = 1) {
-    return new FP_Vector(this.x + num * vector.x, this.y + num * vector.y);
+  mul(vector, num = 1.0) {
+    return new FP_Vector(this.x * num * vector.x, this.y * num * vector.y);
   }
   ortoAlign() {
     let dim = ["x", "y"];
@@ -1025,7 +1027,19 @@ class Angle {
   bounce(face) {
     return new Angle((180 + 2 * face - this.angle) % 360);
   }
+  getDirectionVector(refVector){
+    const angleInRadians = Math.radians(this.angle);
+    const cosAngle = Math.cos(angleInRadians);
+    const sinAngle = Math.sin(angleInRadians);
+    const dirX = refVector.x * cosAngle - refVector.y * sinAngle;
+    const dirY = refVector.x * sinAngle + refVector.y * cosAngle;
+    const magnitude = Math.sqrt(dirX * dirX + dirY * dirY);
+    const normalizedDirX = dirX / magnitude;
+    const normalizedDirY = dirY / magnitude;
+    return new FP_Vector(normalizedDirX, normalizedDirY);
+  }
 }
+
 class DefaultDict {
   constructor(defaultVal) {
     return new Proxy(

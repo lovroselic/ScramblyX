@@ -2,10 +2,10 @@
 /*
  to do:
  known bugs: 
- - shoot over top of the mountain 
+ - shoot through top of the mountain 
  
  */
-/////////////debug vars: remove all in production/////////////////////
+/////////////debug vars/////////////////////
 const DEBUG = {
     CHEAT: false,
     debug: true,
@@ -45,10 +45,10 @@ const INI = {
     TREE_PADDING: 12,
     LAKE_PADDING: 10,
     TREE_CORRECTION: 12,
-    BULLET_SPEED: 24,
+    BULLET_SPEED: 24 * 60, //pix/min 24/frame
     BULLET_TIMEOUT: 180,
     BOMB_TIMEOUT: 680,
-    BOMB_GRAVITY_SPEED: 12,
+    //BOMB_GRAVITY_SPEED: 12,
     ENEMY_PLANES: 11,
     ENEMY_TANKS: 6,
     ENEMY_SHIPS: 4,
@@ -67,7 +67,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.02.02",
+    VERSION: "1.02.03",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -85,7 +85,7 @@ const PRG = {
         ENGINE.start = PRG.start;
         ENGINE.readyCall = GAME.setup;
         //ENGINE.setGridSize(64);
-        //ENGINE.setSpriteSheetSize(64);
+        ENGINE.setSpriteSheetSize(64);
         ENGINE.init();
 
         /*** HERE */
@@ -144,6 +144,7 @@ const PRG = {
 };
 
 ///////////////////////////////////////////////////////////////////
+
 class GeneralDestruction {
     constructor(grid, gameX = GAME.x) {
         this.grid = grid;
@@ -152,7 +153,7 @@ class GeneralDestruction {
         this.gameX = gameX;
         this.movable = true;
     }
-    move(){
+    move() {
         this.adjustPosition();
         this.checkVisibility();
     }
@@ -164,6 +165,10 @@ class GeneralDestruction {
     checkVisibility() {
         if (this.grid.x < INI.LEFT_SPRITE_TOLERANCE_OFFSET) DESTRUCTION_ANIMATION.remove(this.id);
     }
+    draw() {
+        ENGINE.spriteDraw(this.layer, this.grid.x, ENGINE.gameHEIGHT - this.grid.y, this.actor.sprite());
+        ENGINE.layersToClear.add("explosion");
+    }
 }
 
 class Explosion extends GeneralDestruction {
@@ -171,9 +176,12 @@ class Explosion extends GeneralDestruction {
         super(grid);
         this.actor = new ACTOR("Explosion", grid.x, grid.y, "linear", ASSET.Explosion);
     }
-    draw() {
-        ENGINE.spriteDraw(this.layer, this.grid.x, ENGINE.gameHEIGHT - this.grid.y, this.actor.sprite());
-        ENGINE.layersToClear.add("explosion");
+}
+
+class SmokeExplosion extends GeneralDestruction {
+    constructor(grid) {
+        super(grid);
+        this.actor = new ACTOR("Smoke", grid.x, grid.y, "linear", ASSET.Smoke);
     }
 }
 
@@ -225,7 +233,7 @@ class GeneralBallisticObject {
     }
     draw() {
         //console.log("draw", this, this.getSprite());
-        ENGINE.spriteDraw('actors', this.position.x, ENGINE.gameHEIGHT - this.position.y, this.getSprite()); 
+        ENGINE.spriteDraw('actors', this.position.x, ENGINE.gameHEIGHT - this.position.y, this.getSprite());
         ENGINE.layersToClear.add("actors");
     }
 }
@@ -241,7 +249,6 @@ class Bomb extends GeneralBallisticObject {
     setAngle(a) {
         this.angle = Math.min(a, 90.0);
         this.actor.setAngle(Math.round(this.angle));
-        console.warn(this.angle, this.actor.angle);
     }
     addAngle(a) {
         let A = this.angle + a;
@@ -253,9 +260,7 @@ class Bomb extends GeneralBallisticObject {
     move(lapsedTime) {
         this.adjustPosition();
         let timeDelta = lapsedTime / 1000;
-        let x = this.speed.x * this.dir.x * timeDelta;
-        let y = this.speed.y * this.dir.y * timeDelta;
-        this.position = this.position.add(new FP_Vector(x, y));
+        this.position = this.position.add(this.speed.mul(this.dir, timeDelta));
         this.rotate(lapsedTime);
         this.speed.y = this.speed.y + INI.G * timeDelta;
         this.speed.x = Math.max(0, this.speed.x - INI.A * timeDelta);
@@ -263,6 +268,27 @@ class Bomb extends GeneralBallisticObject {
     }
     getSprite() {
         return this.actor.sprite();
+    }
+}
+class Ballistic extends GeneralBallisticObject {
+    constructor(position, dir, speed) {
+        super(position, dir, speed);
+        this.actor = new ACTOR('Bullet');
+        this.name = 'Bullet';
+    }
+    getSprite() {
+        return SPRITE.Bullet;
+    }
+    move(lapsedTime) {
+        this.adjustPosition();
+        let timeDelta = lapsedTime / 1000;
+        this.position = this.position.add(this.speed.mul(this.dir, timeDelta));
+        this.checkVisibility();
+    }
+    explode() {
+        DESTRUCTION_ANIMATION.add(new SmokeExplosion(this.position));
+        AUDIO.Explosion.play();
+        PROFILE_BALLISTIC.remove(this.id);
     }
 }
 
@@ -324,7 +350,7 @@ const PLANE = {
         PLANE.angle = Math.max(PLANE.angle, -30);
         PLANE.angle = Math.min(PLANE.angle, 30);
 
-        console.info("PLANE.angle", PLANE.angle);
+        //console.info("PLANE.angle", PLANE.angle);
     },
 
     manage(lapsedTime) {
@@ -341,7 +367,6 @@ const PLANE = {
         const currentX = PLANE.x + GAME.x + Math.round(PLANE.width / 4);
         const planeBottomY = PLANE.y - Math.round(PLANE.height / 4);
         const height = MAP[GAME.level].heightData[currentX];
-        //console.log("***", currentX, planeBottomY, height, planeBottomY <= height);
         if (planeBottomY <= height) {
             console.warn("collision");
             if (PLANE.airborne && PLANE.clearForlanding && PLANE.angle <= 10) {
@@ -362,11 +387,10 @@ const PLANE = {
             AUDIO.PlaneMotor.loop = true;
             AUDIO.PlaneMotor.playbackRate = 0.5;
             AUDIO.PlaneMotor.play();
-
         }
         if (PLANE.landed) return;
         const timeF = 1000 / lapsedTime;
-        PLANE.x += dir.x * INI.MOVE / timeF;
+        PLANE.x += Math.round(dir.x * INI.MOVE / timeF);
         if (PLANE.x < INI.PLANE_LEFT) PLANE.x = INI.PLANE_LEFT;
         if (PLANE.x > INI.PLANE_RIGHT) PLANE.x = INI.PLANE_RIGHT;
     },
@@ -397,6 +421,7 @@ const PLANE = {
             }
         }
     },*/
+
     die() {
         console.log("plane dies");
         DESTRUCTION_ANIMATION.add(new Explosion(new Grid(PLANE.x, PLANE.y)));
@@ -412,23 +437,25 @@ const PLANE = {
         if (GAME.lives <= 0) return GAME.over();
         GAME.rewind = true;
     },
+    getDirection() {
+        let angle = new Angle(PLANE.angle);
+        let planeDirection = angle.getDirectionVector(RIGHT);
+        planeDirection.y *= -1;                                 //revert to game coordinates
+        return planeDirection;
+    },
     shoot() {
-        if (PLANE.dead)
-            return;
-        if (!PLANE.airborne)
-            return;
-        if (!PLANE.bulletReady)
-            return;
+        if (PLANE.dead) return;
+        if (!PLANE.airborne) return;
+        if (!PLANE.bulletReady) return;
         PLANE.bulletReady = false;
-        var x = PLANE.x + Math.floor(PLANE.sprite.width / 2);
-        var vx = Math.floor(INI.BULLET_SPEED * Math.cos(PLANE.angle * Math.PI / 180));
-        var vy2 = Math.round(
-            INI.BULLET_SPEED * Math.sin(PLANE.angle * Math.PI / 180)
-        );
-        var vy1 = PLANE.getDY(PLANE.angle);
-        var vy = vy1 + vy2;
-        var y = PLANE.y + vy;
-        BULLETS.pool.push(new BulletClass(x, y, vx, vy, 0));
+
+        let planeDirection = PLANE.getDirection();
+        let plane = this.getPlane();
+        let bullet = plane.add(planeDirection, PLANE.width * 0.6);
+        let speed = new FP_Vector(INI.BULLET_SPEED, INI.BULLET_SPEED);
+        PROFILE_BALLISTIC.add(new Ballistic(bullet, planeDirection, speed));
+        AUDIO.Shoot.play();
+ 
         GAME.shotsFired++;
         setTimeout(function () {
             PLANE.bulletReady = true;
@@ -437,19 +464,20 @@ const PLANE = {
     getDY(angle) {
         return -Math.floor(angle / 5);
     },
-
+    getPlane() {
+        return new FP_Grid(PLANE.x, PLANE.y - this.getDY(PLANE.angle) - PLANE.height / 4);
+    },
     dropBomb() {
         if (PLANE.dead) return;
         if (!PLANE.airborne) return;
         if (!PLANE.bombReady) return;
         PLANE.bombReady = false;
 
-        //position
-        let bombX = PLANE.x + Math.floor(PLANE.width * 0.6);
-        let bombY = PLANE.y - Math.floor(PLANE.height * 0.8)
-
-        //
-        let bomb = new FP_Grid(bombX, bombY);               //game coordinates!! 
+        let planeDirection = PLANE.getDirection();
+        planeDirection.y = Math.min(0, planeDirection.y);   //just down
+        let plane = this.getPlane();
+        let bomb = plane.add(planeDirection, PLANE.width * 0.6);
+        bomb.y -= PLANE.height * 0.6;                       //more down
         let dir = new FP_Vector(1, -1);                     //game coordinates!!
         let speed = new FP_Vector(INI.MAX_SPEED, 0);        //in pixels per second
         console.log("dropping bomb", bomb, speed, dir);
@@ -1282,6 +1310,9 @@ const GAME = {
         }
         if (map[ENGINE.KEY.map.space]) {
             PLANE.dropBomb();
+        }
+        if (map[ENGINE.KEY.map.ctrl]) {
+            PLANE.shoot();
         }
 
 

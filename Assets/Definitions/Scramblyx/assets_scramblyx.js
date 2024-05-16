@@ -25,7 +25,8 @@ LoadTextures = [
 LoadAudio = [
   { srcName: "Explosion1.mp3", name: "Explosion" },
   { srcName: "Immaculate Deception - LaughingSkull.mp3", name: "Title" },
-  { srcName: "PlaneMotor.mp3", name: "PlaneMotor" }
+  { srcName: "PlaneMotor.mp3", name: "PlaneMotor" },
+  { srcName: "TankFiring.mp3", name: "Shoot" },
 ];
 
 LoadSprites = [
@@ -53,22 +54,24 @@ LoadSprites = [
   { srcName: "Items/tree7.png", name: "tree7" },
   { srcName: "Items/tree8.png", name: "tree8" },
   { srcName: "Items/zeppelin.png", name: "zeppelin" },
+  //
+  { srcName: "Items/roundBullet.png", name: "Bullet" },
 ];
 
 LoadRotated = [
   //planes
-  { srcName: "Plane1.png", name: "Plane1", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "Plane10.png", name: "Plane10", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "Plane11.png", name: "Plane11", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "Plane2.png", name: "Plane2", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "Plane3.png", name: "Plane3", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "Plane4.png", name: "Plane4", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "Plane5.png", name: "Plane5", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "Plane6.png", name: "Plane6", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "Plane7.png", name: "Plane7", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "Plane8.png", name: "Plane8", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "Plane9.png", name: "Plane9", rotate: { first: -30, last: 30, step: 1 }  },
-  { srcName: "spitfire64.png", name: "Spitfire", rotate: { first: -30, last: 30, step: 1 }  },
+  { srcName: "Plane1.png", name: "Plane1", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane10.png", name: "Plane10", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane11.png", name: "Plane11", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane2.png", name: "Plane2", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane3.png", name: "Plane3", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane4.png", name: "Plane4", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane5.png", name: "Plane5", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane6.png", name: "Plane6", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane7.png", name: "Plane7", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane8.png", name: "Plane8", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane9.png", name: "Plane9", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "spitfire64.png", name: "Spitfire", rotate: { first: -30, last: 30, step: 1 } },
 ];
 
 LoadRotatedSheetSequences = [
@@ -77,7 +80,10 @@ LoadRotatedSheetSequences = [
 ];
 
 LoadSheetSequences = [
-  { srcName: "Explosion2.png", name: "Explosion", type: "png", count: 23 },
+  { srcName: "Explosion64.png", count: 24, name: "Explosion" },
+  //{ srcName: "SmallShortExplosion64.png", count: 6, name: "SmallShortExplosion" },
+  //{ srcName: "SmokeExp64.png", count: 27, name: "Smoke" },
+  { srcName: "Smoke2.png", count: 12, name: "Smoke" }
 ];
 
 /*
