@@ -395,7 +395,11 @@ const DTP = {
                 let tank = new Tank(new Grid(ax, ay), sName);
                 PROFILE_ACTORS.add(tank);
                 break;
-
+            case "zeppelin":
+                ax = DTP.x + Math.floor(chunk.w / 2);
+                ay = ENGINE.gameHEIGHT - 100;
+                let zeppelin = new Zeppelin(new Grid(ax, ay), "zeppelin");
+                PROFILE_ACTORS.add(zeppelin);
             default:
                 break;
         }

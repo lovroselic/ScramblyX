@@ -59,18 +59,18 @@ const INI = {
     SHIP_SCORE: 750,
 
     PLANE_SPEED: 13,
-    ZEPPELIN_SPEED: 9,
+    ZEPPELIN_SPEED: 160,
     PLANE_SHOOT: 1200,
     SHIP_SHOOT: 1600,
     SHIP_RANDOM: 300,
     LEVEL_BONUS: 100000,
     LAST_LEVEL: 5,
     ACCELERATION_TO_MAX: 2, // seconds
-    LEFT_SPRITE_TOLERANCE_OFFSET: 32,
+    LEFT_SPRITE_TOLERANCE_OFFSET: 128,
 };
 
 const PRG = {
-    VERSION: "1.02.06",
+    VERSION: "1.02.07",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -83,16 +83,11 @@ const PRG = {
         $("input#toggleAbout").val(`About  ${PRG.NAME}`);
         $("#about fieldset legend").append(` ${PRG.NAME} `);
 
-
         ENGINE.autostart = true;
         ENGINE.start = PRG.start;
         ENGINE.readyCall = GAME.setup;
-        //ENGINE.setGridSize(64);
         ENGINE.setSpriteSheetSize(64);
         ENGINE.init();
-
-        /*** HERE */
-
     },
     setup() {
         $("#engine_version").html(ENGINE.VERSION);
@@ -218,16 +213,25 @@ class GeneralBallisticObject {
         let X = Math.round(this.position.x);
         let IA = map.profile_actor_IA;
         let ids = IA.unroll(new Grid(X, 0));
-
-        //console.log("..ids", ids);
         for (let id of ids) {
             let obj = PROFILE_ACTORS.show(id);
-            //console.warn(obj.checkHit(this));
             if (obj !== null && obj.checkHit(this)) {
-                console.info(" *************** HIT ***************", "... obj", obj);
+                console.info(" *************** HIT ***************", "... obj", obj, "this", this);
                 let ballistic = PROFILE_BALLISTIC.show(this.id);
                 if (ballistic) ballistic.explode();
                 obj.hit(this.damage);
+                if (obj.id !== PLANE, id) {
+                    switch (this.name) {
+                        case "Bomb":
+                            GAME.bombsHit++;
+                            break;
+                        case "Bullet":
+                            GAME.shotsHit++;
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
         }
     }
@@ -242,7 +246,8 @@ class GeneralBallisticObject {
         this.actor.y = this.position.y;
     }
     checkVisibility() {
-        if (this.position.x < INI.LEFT_SPRITE_TOLERANCE_OFFSET) PROFILE_BALLISTIC.remove(this.id);
+        if (this.position.x < -INI.LEFT_SPRITE_TOLERANCE_OFFSET) PROFILE_BALLISTIC.remove(this.id);
+        if (this.position.x > ENGINE.gameWIDTH + INI.LEFT_SPRITE_TOLERANCE_OFFSET) PROFILE_BALLISTIC.remove(this.id);
     }
     draw() {
         //console.log("draw", this, this.getSprite());
@@ -313,6 +318,9 @@ class Enemy {
         this.sprite_class = sprite_class;
         this.readyToShoot = false;
         this.gameX = gameX;
+        this.actor = new ACTOR(this.sprite_class);
+        this.moveState = new _1D_MoveState(position, 0);
+        this.ready = false;
     }
     collisionBackground() { }
     collisionToActors() { }
@@ -326,6 +334,7 @@ class Enemy {
         ENGINE.layersToClear.add("actors");
     }
     adjustPosition(ref = GAME.x) {
+        this.checkReadiness();
         const dX = ref - this.gameX;
         this.position.x -= dX;
         this.moveState.x = this.position.x;         //PROFILE_ACTORS compatibility
@@ -334,6 +343,11 @@ class Enemy {
     }
     checkVisibility() {
         if (this.position.x < -INI.LEFT_SPRITE_TOLERANCE_OFFSET) PROFILE_ACTORS.remove(this.id);
+    }
+    checkReadiness() {
+        if (this.ready) return;
+        if (this.position.x < ENGINE.gameWIDTH + this.actor.width / 2) this.ready = true;
+
     }
     getSprite() {
         return SPRITE[this.sprite_class];
@@ -367,8 +381,6 @@ class Tank extends Enemy {
         this.moves = false;
         this.canShoot = false;
         this.hunts = false;
-        this.actor = new ACTOR(this.sprite_class);
-        this.moveState = new _1D_MoveState(position, 0);
         this.score = INI.TANK_SCORE;
     }
 }
@@ -407,6 +419,16 @@ class Zeppelin extends Enemy {
         this.canShoot = false;
         this.hunts = false;
         this.score = INI.ZEPPELIN_SCORE;
+        this.dir = FP_Vector.toClass(LEFT);
+        this.speed = new FP_Vector(INI.ZEPPELIN_SPEED, 0);
+    }
+    move(lapsedTime) {
+        this.adjustPosition();
+        if (this.ready) {
+            let timeDelta = lapsedTime / 1000;
+            this.position = this.position.add(this.speed.mul(this.dir, timeDelta));
+        }
+        this.checkVisibility();
     }
 }
 
@@ -474,7 +496,6 @@ const PLANE = {
 
         //console.info("PLANE.angle", PLANE.angle);
     },
-
     manage(lapsedTime) {
         this.collisionBackground();
         this.motorRate();
@@ -501,7 +522,6 @@ const PLANE = {
             } else PLANE.die();
         }
     },
-
     lateral(dir, lapsedTime) {
         if (PLANE.landing) return;
         if (PLANE.speed < INI.MAX_SPEED && !PLANE.acceleration && !GAME.levelComplete) {
@@ -516,6 +536,10 @@ const PLANE = {
         PLANE.x += Math.round(dir.x * INI.MOVE / timeF);
         if (PLANE.x < INI.PLANE_LEFT) PLANE.x = INI.PLANE_LEFT;
         if (PLANE.x > INI.PLANE_RIGHT) PLANE.x = INI.PLANE_RIGHT;
+    },
+    checkHit() {
+        console.warn("ballistic to plane not yet implemented");
+        return false;
     },
 
     /*collisionBullet() {
@@ -927,6 +951,9 @@ const GAME = {
         $(document).keyup(GAME.clearKey);
 
         GAME.bombsDroped = 0;
+        GAME.shotsFired = 0;
+        GAME.bombsHit = 0;
+        GAME.shotsHit = 0;
 
         GAME.level = 1;
         //GAME.level = 2;
@@ -955,9 +982,10 @@ const GAME = {
     levelStart() {
         console.info(" - start -", GAME.level);
         GAME.prepareForRestart();
+        DESTRUCTION_ANIMATION.init(null);
+        PROFILE_BALLISTIC.init(MAP[GAME.level]);
         PROFILE_ACTORS.init(MAP[GAME.level]);
-        PROFILE_ACTORS.add(PLANE);
-        console.log("PROFILE_ACTORS", PROFILE_ACTORS);
+
         GAME.initLevel(GAME.level);
     },
     over() {
@@ -998,8 +1026,7 @@ const GAME = {
                 GAME.rewind = false;
                 PLANE.init();
                 PLANE.position();
-                //ENEMY.active.clear();
-                //ENEMY.init();
+                GAME.initLevel(GAME.level);
             }
         }
 
@@ -1050,35 +1077,6 @@ const GAME = {
         console.log("SCENE completed!");
         PLANE.death();
     },
-    /*run() {
-        if (!GAME.frame.start)
-            GAME.frame.start = Date.now();
-        var current = Date.now();
-        GAME.frame.delta = current - GAME.frame.start;
-        if (GAME.frame.delta > INI.ANIMATION_INTERVAL) {
-            GAME.respond();
-            ENEMY.refresh();
-            GAME.move();
-            ENEMY.move();
-            if (!DEBUG.invincible) ENEMY.shoot();
-            BULLETS.move();
-            BOMBS.move();
-            PLANE.collisions();
-            if (!DEBUG.invincible) PLANE.collisionBullet();
-            ENEMY.collisionBullet();
-            ENEMY.collisionBomb();
-            if (!DEBUG.invincible) ENEMY.collisionPlane();
-            ENEMY.collisionBackground();
-            BULLETS.collisionToBackground();
-            BOMBS.collisionToBackground();
-            GAME.frameDraw();
-            GAME.frame.start = null;
-        }
-        if (GAME.stopAnimation) {
-            return;
-        } else
-            requestAnimationFrame(GAME.run);
-    },*/
     firstFrameDraw() {
         TITLE.render();
         BACKGROUND.sky();
@@ -1095,17 +1093,6 @@ const GAME = {
         PROFILE_BALLISTIC.draw(lapsedTime);
         PROFILE_ACTORS.draw(lapsedTime);
         if (DEBUG.FPS) GAME.FPS(lapsedTime);
-
-
-        /*LEVEL.paintVisible();
-        EXPLOSIONS.draw();
-        ENGINE.clearLayer("plane");
-        PLANE.draw();
-        ENEMY.draw();
-        ENGINE.clearLayer("actors");
-        BULLETS.draw();
-        BOMBS.draw();
-        TEXT.score();*/
     },
     FPS(lapsedTime) {
         let CTX = LAYER.FPS;
@@ -1152,14 +1139,16 @@ const GAME = {
         GAME.bombsHit = 0;
         GAME.x = 0;
 
+        PROFILE_ACTORS.clearAll();
+        PROFILE_BALLISTIC.clearAll();
+        PROFILE_ACTORS.add(PLANE);
+        console.log("PROFILE_ACTORS", PROFILE_ACTORS);
+
         await DTP.drawLevel(GAME.drawLevel, MAP, LAYER.level);
         if (DEBUG.show_hdata) DTP.debugPaint(GAME.drawLevel, MAP, LAYER.level);
-        //ENEMY.pool.clear();
-        //ENEMY.init();
-        DESTRUCTION_ANIMATION.init(null);
-        PROFILE_BALLISTIC.init(MAP[level]);
-        //PROFILE_ACTORS.init(MAP[level]);
-        //PROFILE_ACTORS.add(PLANE);
+
+
+
         GAME.continueLevel(level);
     },
     continueLevel(level) {
@@ -1231,8 +1220,6 @@ const GAME = {
             $("#pause").trigger("click");
             map[ENGINE.KEY.map.F4] = false;
         }
-
-
         if (map[ENGINE.KEY.map.right]) {
             PLANE.lateral(RIGHT, lapsedTime);
         }
@@ -1251,25 +1238,7 @@ const GAME = {
         if (map[ENGINE.KEY.map.ctrl]) {
             PLANE.shoot();
         }
-
-
         return;
-        /*
-        var map = GAME.keymap;
- 
-        if (map[17]) {
-            PLANE.shoot();
-        }
-        if (map[32]) {
-            PLANE.dropBomb();
-        }
- 
-        if (map[13] && GAME.levelComplete) {
-            GAME.nextLevel();
-            return;
-        }
-        return;
-        */
     },
     setTitle() {
         const text = GAME.generateTitleText();
