@@ -504,11 +504,11 @@ const ENGINE = {
       return new RectArea(x, y, W, H);
     } else return null;
   },
+  
+  /** obsolete */
+  /*
   collisionToBackground(actor, layer) {
-    /**
-     * deprecated - redesign required
-     * candidate for removal
-     */
+
     var CTX = layer;
     var maxSq = Math.max(actor.width, actor.height);
     var R = Math.ceil(0.5 * Math.sqrt(2 * Math.pow(maxSq, 2)));
@@ -557,6 +557,8 @@ const ENGINE = {
       return index;
     }
   },
+  */
+
   drawLoadingGraph(counter) {
     var count = ENGINE.LOAD[counter];
     var HMI = ENGINE.LOAD["HM" + counter];

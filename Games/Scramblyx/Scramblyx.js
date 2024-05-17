@@ -49,12 +49,15 @@ const INI = {
     BULLET_TIMEOUT: 180,
     BOMB_TIMEOUT: 680,
     //BOMB_GRAVITY_SPEED: 12,
-    ENEMY_PLANES: 11,
+    //ENEMY_PLANES: 11,
     ENEMY_TANKS: 6,
     ENEMY_SHIPS: 4,
+
+    ZEPPELIN_SCORE: 2500,
     PLANE_SCORE: 1000,
     TANK_SCORE: 500,
     SHIP_SCORE: 750,
+
     PLANE_SPEED: 13,
     ZEPPELIN_SPEED: 9,
     PLANE_SHOOT: 1200,
@@ -64,11 +67,10 @@ const INI = {
     LAST_LEVEL: 5,
     ACCELERATION_TO_MAX: 2, // seconds
     LEFT_SPRITE_TOLERANCE_OFFSET: 32,
-    //NTANK:8,
 };
 
 const PRG = {
-    VERSION: "1.02.05",
+    VERSION: "1.02.06",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -213,28 +215,31 @@ class GeneralBallisticObject {
         }
     }
     collisionEntity(map) {
-
-        /*
         let X = Math.round(this.position.x);
         let IA = map.profile_actor_IA;
         let ids = IA.unroll(new Grid(X, 0));
-        if (ids.length) {
-            for (let id of ids) {
-                let obj = PROFILE_ACTORS.show(id);
-                if (obj !== null && obj.checkHit(this)) {
-                    PROFILE_BALLISTIC.remove(this.id);
-                    if (id !== HERO.id) PROFILE_ACTORS.remove(id);
-                    obj.explode(this.damage);
-                    GAME.addScore(obj.score);
-                }
-            }
-        }*/
 
+        //console.log("..ids", ids);
+        for (let id of ids) {
+            let obj = PROFILE_ACTORS.show(id);
+            //console.warn(obj.checkHit(this));
+            if (obj !== null && obj.checkHit(this)) {
+                console.info(" *************** HIT ***************", "... obj", obj);
+                let ballistic = PROFILE_BALLISTIC.show(this.id);
+                if (ballistic) ballistic.explode();
+                obj.hit(this.damage);
+            }
+        }
     }
     adjustPosition(ref = GAME.x) {
         const dX = ref - this.gameX;
         this.position.x -= dX;
         this.gameX = ref;
+        this.positionToActor();
+    }
+    positionToActor() {
+        this.actor.x = this.position.x;
+        this.actor.y = this.position.y;
     }
     checkVisibility() {
         if (this.position.x < INI.LEFT_SPRITE_TOLERANCE_OFFSET) PROFILE_BALLISTIC.remove(this.id);
@@ -323,13 +328,34 @@ class Enemy {
     adjustPosition(ref = GAME.x) {
         const dX = ref - this.gameX;
         this.position.x -= dX;
+        this.moveState.x = this.position.x;         //PROFILE_ACTORS compatibility
         this.gameX = ref;
+        this.positionToActor();
     }
     checkVisibility() {
         if (this.position.x < -INI.LEFT_SPRITE_TOLERANCE_OFFSET) PROFILE_ACTORS.remove(this.id);
     }
     getSprite() {
         return SPRITE[this.sprite_class];
+    }
+    positionToActor() {
+        this.actor.x = this.position.x;
+        this.actor.y = this.position.y;
+    }
+    checkHit(ballistic) {
+        return ENGINE.collisionArea(this.actor, ballistic.actor);
+    }
+    hit(damage) {
+        this.lives -= damage;
+        if (this.lives <= 0) {
+            GAME.addScore(this.score);
+            this.explode();
+        }
+    }
+    explode() {
+        DESTRUCTION_ANIMATION.add(new Explosion(this.position));
+        AUDIO.Explosion.play();
+        PROFILE_ACTORS.remove(this.id);
     }
 }
 
@@ -342,7 +368,8 @@ class Tank extends Enemy {
         this.canShoot = false;
         this.hunts = false;
         this.actor = new ACTOR(this.sprite_class);
-        this.moveState = new MoveState(position, NOWAY);
+        this.moveState = new _1D_MoveState(position, 0);
+        this.score = INI.TANK_SCORE;
     }
 }
 
@@ -355,6 +382,7 @@ class Ship extends Enemy {
         this.readyToShoot = true;
         this.canShoot = true;
         this.hunts = false;
+        this.score = INI.SHIP_SCORE;
     }
 }
 
@@ -366,6 +394,7 @@ class Aeroplane extends Enemy {
         this.moves = true;
         this.canShoot = true;
         this.hunts = true;
+        this.score = INI.PLANE_SCORE;
     }
 }
 
@@ -377,6 +406,7 @@ class Zeppelin extends Enemy {
         this.moves = true;
         this.canShoot = false;
         this.hunts = false;
+        this.score = INI.ZEPPELIN_SCORE;
     }
 }
 
@@ -397,7 +427,7 @@ const PLANE = {
         this.actor = new ACTOR("Spitfire_0");                               //IAM compatibility
     },
     updateMS() {
-        this.moveState = new MoveState(new Grid(this.x, this.y), NOWAY);    //IAM compatibility
+        this.moveState = new _1D_MoveState(this.x + GAME.x, 1);                      //IAM compatibility
     },
     position() {
         this.y = this.ZERO;
@@ -601,56 +631,6 @@ const BACKGROUND = {
         CTX.fillRect(0, 0, ENGINE.gameWIDTH, INI.GAME_HEIGHT);
     }
 };
-
-
-
-
-/*
-var ENEMY_ACTOR = function (
-    sprite_class,
-    x,
-    y,
-    angle,
-    realX,
-    realY,
-    type,
-    score,
-    speed,
-    shootSpeed,
-    realLives,
-    prevX,
-    prevY
-) {
-    this.actor = new ACTOR(sprite_class, x, y, angle, prevX, prevY);
-    this.realX = realX;
-    this.realY = realY;
-    this.type = type;
-    this.score = score;
-    this.speed = speed;
-    this.shootSpeed = shootSpeed;
-    this.realLives = realLives || 1;
-    this.lives = realLives || 1;
-    this.readyToShoot = false;
- 
-    if (type === "ship")
-        this.readyToShoot = true;
-    if (type === "plane") {
-        this.hunts = true;
-    } else {
-        this.hunts = false;
-    }
-    if (type === "plane" || type === "zeppelin") {
-        this.moves = true;
-    } else {
-        this.moves = false;
-    }
-    if (type === "plane" || type === "ship") {
-        this.canShoot = true;
-    } else {
-        this.canShoot = false;
-    }
-};
-*/
 
 const ENEMY = {
     shoot() {
@@ -1051,6 +1031,7 @@ const GAME = {
 
         if (GAME.rewind) {
             GAME.move(lapsedTime);
+            PROFILE_ACTORS.manage(lapsedTime);
             GAME.frameDraw(lapsedTime);
         } else {
             GAME.respond(lapsedTime);
@@ -1065,6 +1046,7 @@ const GAME = {
     },
     checkIfProcessesComplete() {
         if (DESTRUCTION_ANIMATION.POOL.length !== 0) return;
+        if (PROFILE_BALLISTIC.POOL.length !== 0) return;
         console.log("SCENE completed!");
         PLANE.death();
     },
@@ -1314,6 +1296,10 @@ const GAME = {
     },
     titleFrameDraw() {
         GAME.movingText.draw();
+    },
+    addScore(score) {
+        GAME.score += score;
+        TEXT.score();
     },
 };
 
