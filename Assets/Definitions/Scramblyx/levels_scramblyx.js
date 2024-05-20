@@ -17,13 +17,7 @@ const MAP = {
       { w: 20, y: 280, type: "L" },
       { w: 40, y: 250, type: "L" },
       { w: 100, y: 250, type: "L", enemy: "tank" },
-      {
-        w: 80,
-        y: 320,
-        type: "Q",
-        cp: { x: 20, y: 40, f: 1 },
-        enemy: "zeppelin"
-      },
+      { w: 80, y: 320, type: "Q", cp: { x: 20, y: 40, f: 1 }, enemy: "zeppelin" },
       { w: 50, y: 200, type: "L" },
       { w: 100, y: 50, type: "L" },
       { w: 100, y: INI.ZERO, type: "Q", cp: { x: 70, y: 40, f: 1 } },
@@ -36,14 +30,7 @@ const MAP = {
       { w: 60, y: 300, type: "L" },
       { w: 150, y: 200, type: "Q", cp: { x: 40, y: 25, f: -1 } },
       { w: 120, y: 200, type: "L", enemy: "tank" },
-      {
-        w: 150,
-        y: 300,
-        type: "Q",
-        cp: { x: 40, y: 25, f: -1 },
-        inf: "forest",
-        enemy: "zeppelin"
-      },
+      { w: 150, y: 300, type: "Q", cp: { x: 40, y: 25, f: -1 }, inf: "forest", enemy: "zeppelin" },
       { w: 100, y: INI.TOP, type: "Q", cp: { x: 66, y: 40, f: 1 } },
       { w: 60, y: 650, type: "L" },
       { w: 160, y: 600, type: "L", inf: "forest" },
@@ -60,7 +47,7 @@ const MAP = {
       { w: 100, y: 200, type: "L", inf: "lake" },
       { w: 200, y: 250, type: "L", inf: "forest" },
       { w: 200, y: 250, type: "L", enemy: "tank" },
-      { w: 200, y: 300, type: "L", inf: "forest"}, //deleted plane
+      { w: 200, y: 300, type: "L", inf: "forest" }, //deleted plane
       { w: 100, y: 200, type: "L" },
       { w: 100, y: 170, type: "L", inf: "forest", enemy: "plane", h: [500] },
       { w: 100, y: 170, type: "L", enemy: "tank" },
@@ -93,58 +80,33 @@ const MAP = {
       { w: 40, y: 400, type: "Q", cp: { x: 80, y: 10, f: -1 } },
       { w: 50, y: 370, type: "Q", cp: { x: 35, y: 20, f: 1 } },
       { w: 100, y: 370, type: "L", enemy: "tank" },
-      {
-        w: 120,
-        y: 420,
-        type: "L",
-        inf: "forest", enemy: "plane", h: [700]
-      },
+      { w: 120, y: 420, type: "L", inf: "forest", enemy: "plane", h: [700] },
       { w: 100, y: 370, type: "L" },
-      { w: 100, y: 270, type: "L"  },//
+      { w: 100, y: 270, type: "L" },//
       { w: 100, y: 270, type: "L", enemy: "tank" },
       { w: 150, y: 220, type: "L", inf: "forest" },
       { w: 120, y: 120, type: "L" },
       { w: 120, y: 120, type: "L", enemy: "tank" },
-      { w: 150, y: 120, type: "L", inf: "lake", enemy: "plane", h: [300] }, 
+      { w: 150, y: 120, type: "L", inf: "lake", enemy: "plane", h: [300] },
       { w: 180, y: 250, type: "L", inf: "forest" },
       { w: 40, y: 200, type: "L" },
       { w: 100, y: 170, type: "L", inf: "forest" },
       { w: 100, y: 170, type: "L", enemy: "tank" },
       { w: 20, y: 200, type: "L" },
       { w: 50, y: 150, type: "L" },
-      {
-        w: 50,
-        y: 120,
-        type: "Q",
-        cp: { x: 35, y: 20, f: 1 },
-        enemy: "plane",
-        h: [INI.TOP]
-      },
+      { w: 50, y: 120, type: "Q", cp: { x: 35, y: 20, f: 1 }, enemy: "plane", h: [INI.TOP] },
       { w: 100, y: 120, type: "L", enemy: "tank" },
       { w: 250, y: INI.ZERO, type: "L", inf: "forest" },
       { w: 100, y: INI.ZERO, type: "L", enemy: "tank" },
       { w: 200, y: INI.ZERO, type: "L", inf: "lake" },
       { w: 100, y: INI.ZERO, type: "L", enemy: "tank" },
-      {
-        w: 250,
-        y: 250,
-        type: "L",
-        inf: "forest",
-        enemy: "plane",
-        h: [650]
-      },
+      { w: 250, y: 250, type: "L", inf: "forest", enemy: "plane", h: [650] },
       { w: 100, y: 250, type: "L", enemy: "tank" },
       { w: 100, y: 400, type: "Q", cp: { x: 30, y: 10, f: -1 } },
       { w: 80, y: 320, type: "Q", cp: { x: 35, y: 20, f: 1 } },
       { w: 120, y: 300, type: "L", inf: "forest" },
       { w: 100, y: 300, type: "L", enemy: "tank" },
-      {
-        w: 100,
-        y: 600,
-        type: "Q",
-        cp: { x: 30, y: 10, f: -1 },
-        enemy: "zeppelin"
-      },
+      { w: 100, y: 600, type: "Q", cp: { x: 30, y: 10, f: -1 }, enemy: "zeppelin" },
       { w: 40, y: 520, type: "Q", cp: { x: 35, y: 20, f: 1 } },
       { w: 40, y: 420, type: "Q", cp: { x: 35, y: 20, f: 1 } },
       { w: 50, y: 400, type: "Q", cp: { x: 30, y: 10, f: 1 } },
@@ -166,17 +128,10 @@ const MAP = {
       { w: 100, y: 450, type: "L", inf: "lake" },
       { w: 150, y: 400, type: "L", inf: "forest" },
       { w: 100, y: 400, type: "L", enemy: "tank" },
-      {
-        w: 120,
-        y: 550,
-        type: "Q",
-        cp: { x: 35, y: 10, f: -1 },
-        enemy: "plane",
-        h: [700]
-      },
+      { w: 120, y: 550, type: "Q", cp: { x: 35, y: 10, f: -1 }, enemy: "plane", h: [700] },
       { w: 120, y: 450, type: "Q", cp: { x: 30, y: 10, f: -1 } },
       { w: 100, y: 450, type: "L", enemy: "tank" },
-      { w: 150, y: 500, type: "L", inf: "forest"},  
+      { w: 150, y: 500, type: "L", inf: "forest" },
       { w: 100, y: INI.TOP, type: "L" },
       { w: 100, y: 450, type: "L" },
       { w: 20, y: 430, type: "L" },
@@ -184,10 +139,10 @@ const MAP = {
       { w: 100, y: 400, type: "L", enemy: "tank" },
       { w: 150, y: 420, type: "L", inf: "forest" },
       { w: 250, y: 320, type: "L", inf: "forest" },
-      { w: 100, y: 320, type: "L", inf: "lake", enemy: "plane", h: [500]  },
+      { w: 100, y: 320, type: "L", inf: "lake", enemy: "plane", h: [500] },
       { w: 100, y: 320, type: "L", enemy: "tank" },
       { w: 200, y: 380, type: "L", inf: "forest" },
-      { w: 200, y: 250, type: "L", inf: "forest"}, 
+      { w: 200, y: 250, type: "L", inf: "forest" },
       { w: 100, y: 250, type: "L", enemy: "tank" },
       { w: 200, y: 180, type: "L", inf: "forest" },
       { w: 100, y: 180, type: "L", enemy: "tank" },
@@ -196,20 +151,13 @@ const MAP = {
       { w: 250, y: 180, type: "L", inf: "forest" },
       { w: 100, y: 180, type: "L", enemy: "tank" },
       { w: 100, y: 160, type: "L", inf: "forest" },
-      { w: 100, y: 180, type: "L"}, 
+      { w: 100, y: 180, type: "L" },
       { w: 100, y: 180, type: "L", enemy: "tank" },
       { w: 100, y: 150, type: "L" },
       { w: 100, y: 150, type: "L", inf: "lake", enemy: "plane", h: [350] },
       { w: 250, y: 100, type: "L", inf: "forest" },
       { w: 100, y: 100, type: "L", enemy: "tank" },
-      {
-        w: 400,
-        y: INI.ZERO,
-        type: "L",
-        inf: "forest",
-        enemy: "plane",
-        h: [650]
-      },
+      { w: 400, y: INI.ZERO, type: "L", inf: "forest", enemy: "plane", h: [650] },
       { w: 100, y: INI.ZERO, type: "L", enemy: "tank" },
       { w: 200, y: INI.ZERO, type: "L", inf: "lake", enemy: "plane", h: [150] },
       { w: 50, y: INI.ZERO, type: "L", enemy: "zeppelin" },
@@ -226,7 +174,7 @@ const MAP = {
     mainPattern: "GrassTerrain"
   },
 
-///////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////
 
   2: {
     world: [
@@ -240,30 +188,15 @@ const MAP = {
       { w: 100, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 300, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
       { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
-      {
-        w: 400,
-        y: INI.ZERO,
-        type: "L",
-        pat: "SeaTerrain",
-        enemy: "plane",
-        h: [650, 150]
-      },
+      { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [650, 150] },
       { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 20, y: INI.ZERO, type: "L" },
-      {
-        w: 150,
-        y: INI.ZERO,
-        type: "Q",
-        cp: { x: 50, y: 25, f: -1 },
-        enemy: "plane",
-        h: [200],
-        inf: "palm"
-      },
+      { w: 150, y: INI.ZERO, type: "Q", cp: { x: 50, y: 25, f: -1 }, enemy: "plane", h: [200], inf: "palm" },
       { w: 20, y: INI.ZERO, type: "L" },
       { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 500, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
       { w: 450, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [100] },
-      { w: 500, y: 150, type: "L", inf: "forest", enemy: "plane", h: [250] }, 
+      { w: 500, y: 150, type: "L", inf: "forest", enemy: "plane", h: [250] },
       { w: 100, y: 400, type: "L" },
       { w: 200, y: INI.ZERO, type: "L" },
       { w: 100, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
@@ -275,15 +208,7 @@ const MAP = {
       { w: 350, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
       { w: 300, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 20, y: INI.ZERO, type: "L" },
-      {
-        w: 150,
-        y: INI.ZERO,
-        type: "Q",
-        cp: { x: 50, y: 25, f: -1 },
-        enemy: "plane",
-        h: [300],
-        inf: "palm"
-      },
+      { w: 150, y: INI.ZERO, type: "Q", cp: { x: 50, y: 25, f: -1 }, enemy: "plane", h: [300], inf: "palm" },
       { w: 20, y: INI.ZERO, type: "L" },
       { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 400, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
@@ -294,23 +219,11 @@ const MAP = {
       { w: 300, y: 600, type: "L", enemy: "zeppelin" },
       { w: 100, y: 650, type: "L" },
       { w: 100, y: 550, type: "L" },
-      {
-        w: 300,
-        y: 400,
-        type: "L",
-        inf: "forest"
-      }, 
+      { w: 300, y: 400, type: "L", inf: "forest" },
       { w: 150, y: 400, type: "L", enemy: "tank" },
       { w: 200, y: 420, type: "L", inf: "forest" },
       { w: 400, y: 300, type: "L", inf: "forest" },
-      {
-        w: 200,
-        y: 200,
-        type: "L",
-        inf: "forest",
-        enemy: "plane",
-        h: [INI.TOP]
-      },
+      { w: 200, y: 200, type: "L", inf: "forest", enemy: "plane", h: [INI.TOP] },
       { w: 150, y: INI.ZERO, type: "L" },
       { w: 100, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
@@ -320,28 +233,14 @@ const MAP = {
       { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [300] },
       { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 20, y: INI.ZERO, type: "L" },
-      {
-        w: 150,
-        y: INI.ZERO,
-        type: "Q",
-        cp: { x: 50, y: 25, f: -1 },
-        enemy: "plane",
-        h: [250],
-        inf: "palm"
-      },
+      { w: 150, y: INI.ZERO, type: "Q", cp: { x: 50, y: 25, f: -1 }, enemy: "plane", h: [250], inf: "palm" },
       { w: 20, y: INI.ZERO, type: "L" },
       { w: 250, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 350, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "ship" },
       { w: 450, y: INI.ZERO, type: "L", pat: "SeaTerrain", enemy: "plane", h: [100] },
       { w: 200, y: INI.ZERO, type: "L", pat: "SeaTerrain" },
       { w: 20, y: INI.ZERO, type: "L" },
-      {
-        w: 250,
-        y: INI.ZERO,
-        type: "Q",
-        cp: { x: 50, y: 25, f: -1 },
-        inf: "palm"
-      },
+      { w: 250, y: INI.ZERO, type: "Q", cp: { x: 50, y: 25, f: -1 }, inf: "palm" },
       { w: 20, y: INI.ZERO, type: "L" },
       { w: 50, y: INI.ZERO, type: "L" },
       { w: 1000, y: INI.ZERO, type: "L", inf: "airport" },
@@ -597,7 +496,7 @@ const MAP = {
       { w: 250, y: INI.TOP, type: "L" },
       { w: 250, y: 400, type: "L" },
       { w: 350, y: 300, type: "L", enemy: "zeppelin" },
-      { w: 700, y: 200, type: "L", inf: "forest", enemy: "plane", h: [600] }, 
+      { w: 700, y: 200, type: "L", inf: "forest", enemy: "plane", h: [600] },
       { w: 150, y: 200, type: "L", enemy: "tank" },
       { w: 150, y: 200, type: "L", enemy: "tank" },
       { w: 150, y: 200, type: "L", enemy: "plane", h: [INI.TOP] },
@@ -617,7 +516,7 @@ const MAP = {
         y: 500,
         type: "L",
         inf: "forest"
-      }, 
+      },
       { w: 120, y: 500, type: "L", inf: "lake" },
       { w: 150, y: 500, type: "L", inf: "forest" },
       { w: 150, y: 500, type: "L", enemy: "tank" },
@@ -699,7 +598,7 @@ const MAP = {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  
+
   5: {
     world: [
       { w: INI.PLANE_LEFT, y: INI.ZERO, type: "L" },
@@ -925,7 +824,7 @@ const MAP = {
       //
       { w: 260, y: INI.ZERO, type: "L", enemy: "zeppelin" },
       { w: 300, y: INI.ZERO, type: "L", inf: "lake", enemy: "plane", h: [100, 200] },
-      { w: 350, y: INI.ZERO, type: "L", inf: "forest"},
+      { w: 350, y: INI.ZERO, type: "L", inf: "forest" },
       { w: 1000, y: INI.ZERO, type: "L", inf: "airport", enemy: "zeppelin" },
       { w: 500, y: INI.ZERO, type: "L" },
       { w: 150, y: 768, type: "Q", cp: { x: 35, y: 10, f: -1 } },

@@ -61,7 +61,7 @@ const INI = {
     PLANE_SPEED: 13,
     ZEPPELIN_SPEED: 160,
     PLANE_SHOOT: 1200,
-    SHIP_SHOOT: 1600,
+    SHIP_SHOOT: 600, //1600
     SHIP_RANDOM: 300,
     LEVEL_BONUS: 100000,
     LAST_LEVEL: 5,
@@ -70,7 +70,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.02.09",
+    VERSION: "1.02.10",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -359,7 +359,9 @@ class Enemy {
     move() {
         this.adjustPosition();
         this.checkVisibility();
+        this.shoot();
     }
+    shoot() { }
     draw() {
         if (this.position.x > ENGINE.gameWIDTH + INI.LEFT_SPRITE_TOLERANCE_OFFSET) return;
         ENGINE.spriteDraw('actors', this.position.x, ENGINE.gameHEIGHT - this.position.y, this.getSprite());
@@ -406,6 +408,10 @@ class Enemy {
         AUDIO.Explosion.play();
         PROFILE_ACTORS.remove(this.id);
     }
+    reset(){
+        this.canShoot = true;
+        console.log(this, "can shoot again");
+    }
 }
 
 class Tank extends Enemy {
@@ -426,10 +432,25 @@ class Ship extends Enemy {
         this.realLives = 5;
         this.lives = this.realLives;
         this.moves = false;
-        this.readyToShoot = true;
+        //this.readyToShoot = true;
         this.canShoot = true;
         this.hunts = false;
         this.score = INI.SHIP_SCORE;
+        this.shootingSpeed = INI.SHIP_SHOOT + RND(1, INI.SHIP_RANDOM);
+    }
+    shoot() {
+        if (PLANE.dead) return;
+        if (!this.ready) return;
+        if (!this.canShoot) return;
+        this.canShoot = false;
+        let x = this.position.x;
+        let y = this.position.y + this.actor.height;
+        let speed = new FP_Vector(INI.BULLET_SPEED, INI.BULLET_SPEED);
+        let direction = FP_Vector.toClass(DOWN);
+        PROFILE_BALLISTIC.add(new Ballistic(new FP_Grid(x, y), direction, speed));
+        AUDIO.Shoot.play();
+        setTimeout(this.reset.bind(this), this.shootingSpeed);
+        console.warn("ship", this.id, "shooting", this);
     }
 }
 
@@ -554,6 +575,7 @@ const PLANE = {
                 PLANE.angle = 0;
                 PLANE.y = PLANE.ZERO;
                 PLANE.airborne = false;
+                AUDIO.motorRate.stop();
             } else PLANE.die();
         }
     },
