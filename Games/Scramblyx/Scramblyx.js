@@ -70,7 +70,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.02.07",
+    VERSION: "1.02.08",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -161,7 +161,7 @@ class GeneralDestruction {
         this.gameX = ref;
     }
     checkVisibility() {
-        if (this.grid.x < INI.LEFT_SPRITE_TOLERANCE_OFFSET) DESTRUCTION_ANIMATION.remove(this.id);
+        if (this.grid.x < -INI.LEFT_SPRITE_TOLERANCE_OFFSET) DESTRUCTION_ANIMATION.remove(this.id);
     }
     draw() {
         ENGINE.spriteDraw(this.layer, this.grid.x, ENGINE.gameHEIGHT - this.grid.y, this.actor.sprite());
@@ -220,13 +220,13 @@ class GeneralBallisticObject {
                 let ballistic = PROFILE_BALLISTIC.show(this.id);
                 if (ballistic) ballistic.explode();
                 obj.hit(this.damage);
-                if (obj.id !== PLANE, id) {
+                if (obj.id !== PLANE.id) {
                     switch (this.name) {
                         case "Bomb":
                             GAME.bombsHit++;
                             break;
                         case "Bullet":
-                            GAME.shotsHit++;
+                            if (this.fromPlane) GAME.shotsHit++;
                             break;
                         default:
                             break;
@@ -290,11 +290,12 @@ class Bomb extends GeneralBallisticObject {
     }
 }
 class Ballistic extends GeneralBallisticObject {
-    constructor(position, dir, speed) {
+    constructor(position, dir, speed, fromPlane = false) {
         super(position, dir, speed);
         this.actor = new ACTOR('Bullet');
         this.name = 'Bullet';
         this.damage = 1;
+        this.fromPlane = fromPlane;
     }
     getSprite() {
         return SPRITE.Bullet;
@@ -321,9 +322,40 @@ class Enemy {
         this.actor = new ACTOR(this.sprite_class);
         this.moveState = new _1D_MoveState(position, 0);
         this.ready = false;
+        this.name = sprite_class;
     }
-    collisionBackground() { }
-    collisionToActors() { }
+    collisionBackground(map) {
+        /** not tested - copy from ballistic class */
+        let position = Math.round(this.position.x) + GAME.x;
+        let backgroundHeight = map.heightData[position];
+        if (this.position.y <= backgroundHeight) {
+            this.explode();
+        }
+    }
+    collisionToActors(map) {
+        if (!this.ready) return;
+        console.log("*****************************");
+        console.log("checking", this.name, this.id);
+
+        let X = Math.max(0, Math.round(this.position.x - this.actor.width / 2));
+
+        console.log("X", X, "GAME.x", GAME.x, "PLANE.x", PLANE.x, "MS", PLANE.moveState.x, "Actor plane", PLANE.actor.x);
+        let IA = map.profile_actor_IA;
+        let ids = IA.unroll(new Grid(X, 0));
+        //remove self id
+        ids.remove(this.id);
+        if (ids.length > 0) console.warn("ids", ids);
+        for (let id of ids) {
+            console.warn(" ...id", id);
+            let obj = PROFILE_ACTORS.show(id);
+            if (obj !== null && obj.checkHit(this)) {
+                console.info(" *************** ACTOR TO ACTOR HIT ***************", "... obj", obj, "this", this);
+                let target = PROFILE_ACTORS.show(this.id);
+                if (target) target.crash();
+                obj.crash();
+            }
+        }
+    }
     move() {
         this.adjustPosition();
         this.checkVisibility();
@@ -365,6 +397,9 @@ class Enemy {
             GAME.addScore(this.score);
             this.explode();
         }
+    }
+    crash() {
+        this.explode();
     }
     explode() {
         DESTRUCTION_ANIMATION.add(new Explosion(this.position));
@@ -436,6 +471,7 @@ class Zeppelin extends Enemy {
 
 const PLANE = {
     firstInit() {
+        this.name = "HERO";
         this.plane = "Spitfire";
         this.angle = 0;
         this.sprite = SPRITE[PLANE.plane + "_" + PLANE.angle];
@@ -444,12 +480,14 @@ const PLANE = {
         this.ignoreByManager = true;
         this.ZERO = INI.ZERO + Math.floor(this.height / 2);
         this.TOP = INI.TOP + INI.PLANE_TOP_OFFSET;
+        this.actor = new ACTOR("Spitfire_0");                                   //IAM compatibility
         this.init();
         this.position();
-        this.actor = new ACTOR("Spitfire_0");                               //IAM compatibility
     },
     updateMS() {
-        this.moveState = new _1D_MoveState(this.x + GAME.x, 1);                      //IAM compatibility
+        this.moveState = new _1D_MoveState(this.x, 1);                          //IAM compatibility
+        this.actor.x = PLANE.x;
+        this.actor.y = PLANE.y;
     },
     position() {
         this.y = this.ZERO;
@@ -489,12 +527,9 @@ const PLANE = {
 
         map[ENGINE.KEY.map.up] = false;
         map[ENGINE.KEY.map.down] = false;
-
         PLANE.angle = PLANE.angle + dir.y * 5;
         PLANE.angle = Math.max(PLANE.angle, -30);
         PLANE.angle = Math.min(PLANE.angle, 30);
-
-        //console.info("PLANE.angle", PLANE.angle);
     },
     manage(lapsedTime) {
         this.collisionBackground();
@@ -537,38 +572,18 @@ const PLANE = {
         if (PLANE.x < INI.PLANE_LEFT) PLANE.x = INI.PLANE_LEFT;
         if (PLANE.x > INI.PLANE_RIGHT) PLANE.x = INI.PLANE_RIGHT;
     },
-    checkHit() {
-        console.warn("ballistic to plane not yet implemented");
-        return false;
+    checkHit(another) {
+        console.warn("PLANE. check hit, another", another);
+        return ENGINE.collisionArea(this.actor, another.actor);
     },
-
-    /*collisionBullet() {
-        if (PLANE.landed && GAME.x < GAME.airportLength - INI.MAX_SPEED)
-            return;
-        if (PLANE.dead)
-            return;
-        var LN = BULLETS.pool.length;
-        if (LN === 0)
-            return;
-        var Plane = new ACTOR(PLANE.plane, PLANE.x, PLANE.y, PLANE.angle);
-        var HTB, blt;
-        for (var q = LN - 1; q >= 0; q--) {
-            blt = new ACTOR(
-                "bullet",
-                BULLETS.pool[q].x,
-                BULLETS.pool[q].y,
-                0,
-                BULLETS.pool[q].prevX,
-                BULLETS.pool[q].prevY
-            );
-            HTB = ENGINE.collision(blt, Plane);
-            if (HTB) {
-                BULLETS.remove(q);
-                PLANE.die();
-            }
-        }
-    },*/
-
+    hit() {
+        console.error("PLANE hit not yet implemented");
+        PLANE.die();
+    },
+    crash() {
+        console.error("PLANE crash to actor not yet implemented");
+        PLANE.die();
+    },
     die() {
         console.log("plane dies");
         DESTRUCTION_ANIMATION.add(new Explosion(new Grid(PLANE.x, PLANE.y)));
@@ -600,7 +615,7 @@ const PLANE = {
         let plane = this.getPlane();
         let bullet = plane.add(planeDirection, PLANE.width * 0.6);
         let speed = new FP_Vector(INI.BULLET_SPEED, INI.BULLET_SPEED);
-        PROFILE_BALLISTIC.add(new Ballistic(bullet, planeDirection, speed));
+        PROFILE_BALLISTIC.add(new Ballistic(bullet, planeDirection, speed, true));
         AUDIO.Shoot.play();
 
         GAME.shotsFired++;
@@ -1146,8 +1161,6 @@ const GAME = {
 
         await DTP.drawLevel(GAME.drawLevel, MAP, LAYER.level);
         if (DEBUG.show_hdata) DTP.debugPaint(GAME.drawLevel, MAP, LAYER.level);
-
-
 
         GAME.continueLevel(level);
     },
