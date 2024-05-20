@@ -201,7 +201,7 @@ const LEVEL = {
                 "ship", //type
                 INI.SHIP_SCORE,
                 0,
-                INI.SHIP_SHOOT + RND(1, INI.SHIP_RANDOM),
+                INI.SHIP_SHOOT + RND(1, INI.SHIP_RANDOM), //shooting speed
                 5, //realLives
                 null,
                 null //prevX, prevY

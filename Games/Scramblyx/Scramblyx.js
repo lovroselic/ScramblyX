@@ -70,7 +70,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.02.08",
+    VERSION: "1.02.09",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -423,7 +423,7 @@ class Tank extends Enemy {
 class Ship extends Enemy {
     constructor(position, sprite_class) {
         super(position, sprite_class);
-        this.realLives = 1;
+        this.realLives = 5;
         this.lives = this.realLives;
         this.moves = false;
         this.readyToShoot = true;
@@ -970,8 +970,8 @@ const GAME = {
         GAME.bombsHit = 0;
         GAME.shotsHit = 0;
 
-        GAME.level = 1;
-        //GAME.level = 2;
+        //GAME.level = 1;
+        GAME.level = 2;
         GAME.lives = 3;
         GAME.score = 0;
         GAME.extraLife = SCORE.extraLife.clone();
