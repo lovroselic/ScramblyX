@@ -67,10 +67,11 @@ const INI = {
     LAST_LEVEL: 5,
     ACCELERATION_TO_MAX: 2, // seconds
     LEFT_SPRITE_TOLERANCE_OFFSET: 128,
+    TOP_SPRITE_TOLERANCE_OFFSET: 16,
 };
 
 const PRG = {
-    VERSION: "1.02.10",
+    VERSION: "1.02.11",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -210,7 +211,7 @@ class GeneralBallisticObject {
         }
     }
     collisionEntity(map) {
-        let X = Math.round(this.position.x);
+        let X = Math.max(0, Math.round(this.position.x));
         let IA = map.profile_actor_IA;
         let ids = IA.unroll(new Grid(X, 0));
         for (let id of ids) {
@@ -248,9 +249,9 @@ class GeneralBallisticObject {
     checkVisibility() {
         if (this.position.x < -INI.LEFT_SPRITE_TOLERANCE_OFFSET) PROFILE_BALLISTIC.remove(this.id);
         if (this.position.x > ENGINE.gameWIDTH + INI.LEFT_SPRITE_TOLERANCE_OFFSET) PROFILE_BALLISTIC.remove(this.id);
+        if (this.position.y > ENGINE.gameHEIGHT + INI.TOP_SPRITE_TOLERANCE_OFFSET) PROFILE_BALLISTIC.remove(this.id);
     }
     draw() {
-        //console.log("draw", this, this.getSprite());
         ENGINE.spriteDraw('actors', this.position.x, ENGINE.gameHEIGHT - this.position.y, this.getSprite());
         ENGINE.layersToClear.add("actors");
     }
@@ -334,12 +335,12 @@ class Enemy {
     }
     collisionToActors(map) {
         if (!this.ready) return;
-        console.log("*****************************");
-        console.log("checking", this.name, this.id);
+        //console.log("*****************************");
+        //console.log("checking", this.name, this.id);
 
         let X = Math.max(0, Math.round(this.position.x - this.actor.width / 2));
 
-        console.log("X", X, "GAME.x", GAME.x, "PLANE.x", PLANE.x, "MS", PLANE.moveState.x, "Actor plane", PLANE.actor.x);
+        //console.log("X", X, "GAME.x", GAME.x, "PLANE.x", PLANE.x, "MS", PLANE.moveState.x, "Actor plane", PLANE.actor.x);
         let IA = map.profile_actor_IA;
         let ids = IA.unroll(new Grid(X, 0));
         //remove self id
@@ -408,7 +409,7 @@ class Enemy {
         AUDIO.Explosion.play();
         PROFILE_ACTORS.remove(this.id);
     }
-    reset(){
+    reset() {
         this.canShoot = true;
         console.log(this, "can shoot again");
     }
@@ -432,7 +433,6 @@ class Ship extends Enemy {
         this.realLives = 5;
         this.lives = this.realLives;
         this.moves = false;
-        //this.readyToShoot = true;
         this.canShoot = true;
         this.hunts = false;
         this.score = INI.SHIP_SCORE;
