@@ -14,7 +14,7 @@ const DEBUG = {
     lives: 5,
     show_hdata: false,
     FPS: true,
-    bulletImmune: false
+    bulletImmune: true
 };
 
 ////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.03.01",
+    VERSION: "1.03.02",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -335,7 +335,7 @@ class Enemy {
         let IA = map.profile_actor_IA;
         let ids = IA.unroll(new Grid(X, 0));
         ids.remove(this.id);
-        
+
         for (let id of ids) {
             let obj = PROFILE_ACTORS.show(id);
             if (obj !== null && obj.checkHit(this)) {
@@ -595,7 +595,7 @@ const PLANE = {
         if (PLANE.landed && map[ENGINE.KEY.map.down]) return;
 
         if (PLANE.landed && map[ENGINE.KEY.map.up]) {
-            console.warn("LIFT OFF");
+            //console.warn("LIFT OFF");
             PLANE.landed = false;
             PLANE.airborne = true;
             PLANE.y += 2;
@@ -623,11 +623,10 @@ const PLANE = {
         if (PLANE.dead) return;
         const currentX = PLANE.x + GAME.x + Math.round(PLANE.width / 4);
         const planeBottomY = PLANE.y - Math.round(PLANE.height / 4);
-        const height = MAP[GAME.level].heightData[currentX];
+        //const height = MAP[GAME.level].heightData[currentX];
+        const height = MAP[GAME.getRealLevel()].heightData[currentX];
         if (planeBottomY <= height) {
-            console.warn("collision");
             if (PLANE.airborne && PLANE.clearForlanding && PLANE.angle <= 10) {
-                console.info("plane landing");
                 PLANE.landing = true;
                 PLANE.angle = 0;
                 PLANE.y = PLANE.ZERO;
@@ -652,19 +651,16 @@ const PLANE = {
         if (PLANE.x > INI.PLANE_RIGHT) PLANE.x = INI.PLANE_RIGHT;
     },
     checkHit(another) {
-        //console.warn("PLANE. check hit, another", another);
         return ENGINE.collisionArea(this.actor, another.actor);
     },
     hit() {
-        console.error("PLANE hit not yet implemented");
         PLANE.die();
     },
     crash() {
-        console.error("PLANE crash to actor not yet implemented");
         PLANE.die();
     },
     die() {
-        console.log("plane dies");
+        //console.log("plane dies");
         if (DEBUG.invincible) return;
         DESTRUCTION_ANIMATION.add(new Explosion(new Grid(PLANE.x, PLANE.y)));
         AUDIO.Explosion.play();
@@ -673,9 +669,23 @@ const PLANE = {
         PLANE.speed = 0;
         ENGINE.clearLayer("plane");
         GAME.lives--;
+        let texts = [
+            "My god, how clumsy you are.",
+            "Are you really going to let the Nazi win?",
+            "Watch out.",
+            "Be more carefull.",
+            "Your are kind of hopeless.",
+            "Your imcompetence makes me cry.",
+            "Are you sure playing games is the right hobby for you?"
+        ];
+        SPEECH.use('Princess');
+        setTimeout(function () {
+            SPEECH.speak(texts.chooseRandom());
+        }, 1000);
+        //SPEECH.speak(texts.chooseRandom());
     },
     death() {
-        console.log("process completed, death, start rewind");
+        //console.log("process completed, death, start rewind");
         if (GAME.lives <= 0) return GAME.over();
         GAME.rewind = true;
     },
@@ -722,7 +732,7 @@ const PLANE = {
         bomb.y -= PLANE.height * 0.6;                           //more down
         let dir = new FP_Vector(1, -1);                         //game coordinates!!
         let speed = new FP_Vector(INI.MAX_SPEED, 0);            //in pixels per second
-        console.log("dropping bomb", bomb, speed, dir);
+        //console.log("dropping bomb", bomb, speed, dir);
         PROFILE_BALLISTIC.add(new Bomb(bomb, dir, speed));
         GAME.bombsDroped++;
 
@@ -751,268 +761,11 @@ const BACKGROUND = {
     }
 };
 
-const ENEMY = {
-    shoot() {
-        if (PLANE.dead)
-            return;
-        var EPL = ENEMY.active.length;
-        if (EPL === 0)
-            return;
-        for (var q = 0; q < EPL; q++) {
-            if (ENEMY.active[q].canShoot) {
-                if (ENEMY.active[q].readyToShoot) {
-                    var x, y, vx, vy;
-                    if (ENEMY.active[q].type === "plane") {
-                        x =
-                            ENEMY.active[q].actor.x -
-                            Math.floor(ENEMY.active[q].actor.width / 2) -
-                            1;
-                        vx =
-                            Math.floor(
-                                INI.BULLET_SPEED * Math.cos(ENEMY.active[q].actor.angle * Math.PI / 180)
-                            ) * -1;
-                        vy =
-                            Math.floor(
-                                INI.BULLET_SPEED * Math.sin(ENEMY.active[q].actor.angle * Math.PI / 180)
-                            ) * -1;
-                        y = ENEMY.active[q].actor.y + vy;
-                    } else if (ENEMY.active[q].type === "ship") {
-                        x = ENEMY.active[q].actor.x - Math.round(ENEMY.active[q].actor.width / 3);
-                        vx = Math.round(0.7 * INI.BULLET_SPEED) * -1;
-                        vy = vx;
-                        y = ENEMY.active[q].actor.y - Math.ceil(ENEMY.active[q].actor.height / 2);
-                    }
-
-                    BULLETS.pool.push(new BulletClass(x, y, vx, vy, 0));
-                    ENEMY.active[q].canShoot = false;
-                    setTimeout(
-                        coolOff.bind(null, ENEMY.active[q]),
-                        ENEMY.active[q].shootSpeed
-                    );
-                }
-            }
-        }
-
-        function coolOff(EA) {
-            EA.canShoot = true;
-        }
-    },
-    init() {
-        ENEMY.refreshIndex = 0;
-        var EPL = ENEMY.pool.length;
-        for (var q = 0; q < EPL; q++) {
-            ENEMY.pool[q].actor.x = ENEMY.pool[q].realX;
-            ENEMY.pool[q].actor.y = ENEMY.pool[q].realY;
-            ENEMY.pool[q].lives = ENEMY.pool[q].realLives;
-        }
-    },
-    pool: [],
-    active: [],
-    refreshIndex: 0,
-    refresh() {
-        var EPL = ENEMY.pool.length;
-        var distance;
-        while (ENEMY.refreshIndex < EPL) {
-            distance =
-                GAME.x +
-                ENGINE.gameWIDTH +
-                Math.floor(ENEMY.pool[ENEMY.refreshIndex].actor.width / 2) +
-                1;
-            if (distance >= ENEMY.pool[ENEMY.refreshIndex].realX) {
-                ENEMY.pool[ENEMY.refreshIndex].actor.x =
-                    ENEMY.pool[ENEMY.refreshIndex].realX - GAME.x;
-                ENEMY.active.push(ENEMY.pool[ENEMY.refreshIndex]);
-                ENEMY.refreshIndex++;
-            } else
-                break;
-        }
-    },
-    draw() {
-        var EAL = ENEMY.active.length;
-        if (EAL === 0)
-            return;
-        for (var q = 0; q < EAL; q++) {
-            ENEMY.active[q].actor.refresh();
-            ENGINE.spriteDraw(
-                "plane",
-                ENEMY.active[q].actor.x,
-                ENEMY.active[q].actor.y,
-                SPRITE[ENEMY.active[q].actor.name]
-            );
-        }
-    },
-    move() {
-        var EAL = ENEMY.active.length;
-        if (EAL === 0)
-            return;
-        for (var q = EAL - 1; q >= 0; q--) {
-            if (ENEMY.active[q].moves) {
-                ENEMY.active[q].actor.prevX = ENEMY.active[q].actor.x;
-                ENEMY.active[q].actor.prevY = ENEMY.active[q].actor.y;
-                ENEMY.active[q].actor.x -= ENEMY.active[q].speed;
-            } else {
-                ENEMY.active[q].actor.x -= PLANE.speed;
-            }
-            if (
-                ENEMY.active[q].actor.x + Math.floor(ENEMY.active[q].actor.width / 2) + 1 <
-                0
-            ) {
-                ENEMY.remove(q);
-                continue;
-            }
-
-            if (ENEMY.active[q].hunts) {
-                if (ENEMY.active[q].actor.x > PLANE.x) {
-                    var dx = ENEMY.active[q].actor.x - PLANE.x;
-                    var dy = ENEMY.active[q].actor.y - PLANE.y;
-                    var ang = Math.round(Math.atan(dy / dx) * 180 / Math.PI);
-                    var corr = Math.round(ang / 5) * 5;
-                    var realAng = ENEMY.active[q].actor.angle;
-                    if (realAng > 20)
-                        realAng -= 360;
-
-                    if (corr < realAng) {
-                        realAng -= 5;
-                        ENEMY.active[q].readyToShoot = false;
-                        if (realAng < -20)
-                            realAng = -20;
-                    } else if (corr > realAng) {
-                        realAng += 5;
-                        ENEMY.active[q].readyToShoot = false;
-                        if (realAng > 20)
-                            realAng = 20;
-                    } else if (corr === realAng) {
-                        ENEMY.active[q].readyToShoot = true;
-                    }
-                    if (realAng < 0)
-                        realAng += 360;
-                    ENEMY.active[q].actor.angle = realAng;
-                    var changeY = PLANE.getDY(realAng);
-                    ENEMY.active[q].actor.y -= changeY;
-                } else {
-                    ENEMY.active[q].actor.angle = 0;
-                }
-            }
-        }
-    },
-    remove(q) {
-        ENEMY.active.splice(q, 1);
-        return;
-    },
-    die(q) {
-        ENGINE.clearLayer("plane");
-        EXPLOSIONS.pool.push(
-            new AnimationSPRITE(
-                ENEMY.active[q].actor.x,
-                ENEMY.active[q].actor.y,
-                "AlienExp",
-                6
-            )
-        );
-        ENEMY.remove(q);
-    },
-    collisionBomb() {
-        var LN = BOMBS.pool.length;
-        if (LN === 0)
-            return;
-        var ENL = ENEMY.active.length;
-        if (ENL === 0)
-            return;
-
-        var HTB, blt;
-        for (var q = LN - 1; q >= 0; q--) {
-            blt = new ACTOR("bomb", BOMBS.pool[q].x, BOMBS.pool[q].y, 0);
-            ENL = ENEMY.active.length;
-            for (var w = ENL - 1; w >= 0; w--) {
-                HTB = ENGINE.collision(ENEMY.active[w].actor, blt);
-                if (HTB) {
-                    EXPLOSIONS.pool.push(
-                        new AnimationSPRITE(BOMBS.pool[q].x, BOMBS.pool[q].y, "AstExp", 12)
-                    );
-                    BOMBS.remove(q);
-                    GAME.bombsHit++;
-                    ENEMY.active[w].lives -= 5;
-                    if (ENEMY.active[w].lives <= 0) {
-                        GAME.score += ENEMY.active[w].score;
-                        ENEMY.die(w);
-                        break;
-                    }
-                }
-            }
-        }
-    },
-    collisionBullet() {
-        var LN = BULLETS.pool.length;
-        if (LN === 0)
-            return;
-        var ENL = ENEMY.active.length;
-        if (ENL === 0)
-            return;
-
-        var HTB, blt;
-        for (var q = LN - 1; q >= 0; q--) {
-            blt = new ACTOR(
-                "bullet",
-                BULLETS.pool[q].x,
-                BULLETS.pool[q].y,
-                0,
-                BULLETS.pool[q].prevX,
-                BULLETS.pool[q].prevY
-            );
-            ENL = ENEMY.active.length;
-            for (var w = ENL - 1; w >= 0; w--) {
-                HTB = ENGINE.collision(ENEMY.active[w].actor, blt);
-                if (HTB) {
-                    BULLETS.remove(q);
-                    GAME.shotsHit++;
-                    ENEMY.active[w].lives--;
-                    if (ENEMY.active[w].lives <= 0) {
-                        GAME.score += ENEMY.active[w].score;
-                        ENEMY.die(w);
-                        break;
-                    }
-                }
-            }
-        }
-    },
-    collisionPlane() {
-        if (PLANE.dead)
-            return;
-        var ENL = ENEMY.active.length;
-        if (ENL === 0)
-            return;
-        var Plane = new ACTOR(PLANE.plane, PLANE.x, PLANE.y, PLANE.angle);
-        var HTB;
-        for (var w = ENL - 1; w >= 0; w--) {
-            HTB = ENGINE.collision(Plane, ENEMY.active[w].actor);
-            if (HTB) {
-                PLANE.die();
-                ENEMY.active[w].lives--;
-                if (ENEMY.active[w].lives <= 0) {
-                    GAME.score += ENEMY.active[w].score;
-                    ENEMY.die(w);
-                    break;
-                }
-            }
-        }
-    },
-    collisionBackground() {
-        var ENL = ENEMY.active.length;
-        if (ENL === 0)
-            return;
-        var HTB;
-        for (var w = ENL - 1; w >= 0; w--) {
-            if (ENEMY.active[w].moves) {
-                HTB = ENGINE.collisionToBackground(ENEMY.active[w].actor, LAYER.world);
-                if (HTB) {
-                    ENEMY.die(w);
-                }
-            }
-        }
-    }
-};
-
 const GAME = {
+    motorOn: false,
+    getRealLevel() {
+        return GAME.level % INI.LAST_LEVEL;
+    },
     setup() {
         console.info("GAME SETUP");
     },
@@ -1020,7 +773,6 @@ const GAME = {
         let drawLevel = level % INI.LAST_LEVEL;
         if (drawLevel === 0) drawLevel = INI.LAST_LEVEL;
         GAME.drawLevel = drawLevel;
-        console.log("..draw level", GAME.drawLevel);
         return;
     },
     start() {
@@ -1051,20 +803,21 @@ const GAME = {
         GAME.shotsHit = 0;
 
         //GAME.level = 1;
-        GAME.level = 2;
+        GAME.level = 13;
         GAME.lives = 3;
         GAME.score = 0;
         GAME.extraLife = SCORE.extraLife.clone();
 
-
         /****************/
+
         if (DEBUG.CHEAT) {
             GAME.level = DEBUG.LEVEL;
             GAME.lives = DEBUG.lives;
         }
+
         /****************/
 
-        GAME.setDrawLevel(GAME.level);
+        //GAME.setDrawLevel(GAME.level);
         GAME.fps = new FPS_short_term_measurement(300);
         GAME.ended = false;
         PLANE.firstInit();
@@ -1078,10 +831,12 @@ const GAME = {
         console.info(" - start -", GAME.level);
         GAME.prepareForRestart();
         DESTRUCTION_ANIMATION.init(null);
-        PROFILE_BALLISTIC.init(MAP[GAME.level]);
+        /*PROFILE_BALLISTIC.init(MAP[GAME.level]);
         PROFILE_ACTORS.init(MAP[GAME.level]);
-
-        GAME.initLevel(GAME.level);
+        GAME.initLevel(GAME.level);*/
+        PROFILE_BALLISTIC.init(MAP[GAME.getRealLevel()]);
+        PROFILE_ACTORS.init(MAP[GAME.getRealLevel()]);
+        GAME.initLevel(GAME.getRealLevel());
     },
     over() {
         console.log("GAME OVER");
@@ -1103,7 +858,6 @@ const GAME = {
         const speedchange = INI.MAX_SPEED * timeDelta / INI.ACCELERATION_TO_MAX;
         if (PLANE.landing) {
             PLANE.speed -= speedchange;
-            console.log("LANDING", PLANE.speed);
             if (PLANE.speed < 0) {
                 PLANE.speed = 0;
                 PLANE.landing = false;
@@ -1219,14 +973,17 @@ const GAME = {
     },
     nextLevel() {
         GAME.level++;
-        GAME.setDrawLevel(GAME.level);
+        //GAME.setDrawLevel(GAME.level);
         ENGINE.clearLayer("text");
         console.log("Ascending to level ", GAME.level);
-        PLANE.init();
-        GAME.initLevel(GAME.level);
+        //PLANE.init();
+        PLANE.firstInit();
+        GAME.levelStart();
+        //GAME.initLevel(GAME.level);
     },
     async initLevel(level) {
         console.info("init level", level);
+        GAME.setDrawLevel(GAME.level);
         GAME.levelComplete = false;
         GAME.shotsFired = 0;
         GAME.shotsHit = 0;
@@ -1237,7 +994,7 @@ const GAME = {
         PROFILE_ACTORS.clearAll();
         PROFILE_BALLISTIC.clearAll();
         PROFILE_ACTORS.add(PLANE);
-        console.log("PROFILE_ACTORS", PROFILE_ACTORS);
+        //console.log("PROFILE_ACTORS", PROFILE_ACTORS);
 
         await DTP.drawLevel(GAME.drawLevel, MAP, LAYER.level);
         if (DEBUG.show_hdata) DTP.debugPaint(GAME.drawLevel, MAP, LAYER.level);
@@ -1268,6 +1025,10 @@ const GAME = {
         let texts = [
             "Let's shoot some bastards!",
             "Are you ready to spit some fire?",
+            "Shoot everybody.",
+            "Try not to get hurt.",
+            "See those planes? They are out to get you.",
+            "At least try to survive",
         ];
         SPEECH.use('Princess');
         SPEECH.speak(texts.chooseRandom());
@@ -1286,6 +1047,10 @@ const GAME = {
         if (GAME.levelFinished) return;
         if (PLANE.dead) return;
         console.log("%cGAME paused.", PRG.CSS);
+        if (AUDIO.PlaneMotor.isPlaying()) {
+            GAME.motorOn = true;
+            AUDIO.PlaneMotor.stop();
+        }
         let GameRD = new RenderData("NGage", 48, "#DDD", "text", "#000", 2, 2, 2);
         ENGINE.TEXT.setRD(GameRD);
         $("#pause").prop("value", "Resume Game [F4]");
@@ -1297,6 +1062,10 @@ const GAME = {
     },
     resume() {
         console.log("%cGAME resumed.", PRG.CSS);
+        if (GAME.motorOn) {
+            AUDIO.PlaneMotor.play();
+            GAME.motorOn = false;
+        }
         $("#pause").prop("value", "Pause Game [F4]");
         $("#pause").off("click", GAME.resume);
         $("#pause").on("click", GAME.pause);
@@ -1437,7 +1206,6 @@ const TITLE = {
         var CTX = LAYER.text;
         CTX.fillStyle = "#FFF";
         CTX.font = fs + "px Consolas";
-        //CTX.font = fs + "px Arcade";
         CTX.shadowColor = "#000";
         CTX.shadowOffsetX = 2;
         CTX.shadowOffsetY = 2;

@@ -24,6 +24,7 @@ changelog:
       Point as extension of masterGrid class
       Angle.getDirectionVector
       Vector.mul bug corrected
+      AUDIO.isPlaying
 
 */
 
@@ -1038,6 +1039,11 @@ class Angle {
     return new FP_Vector(normalizedDirX, normalizedDirY);
   }
 }
+
+//audio
+HTMLAudioElement.prototype.isPlaying = function() {
+  return !this.paused && this.currentTime > 0;
+};
 
 class DefaultDict {
   constructor(defaultVal) {

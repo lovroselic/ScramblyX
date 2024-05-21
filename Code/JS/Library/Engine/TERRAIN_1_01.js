@@ -279,6 +279,7 @@ const DTP = {
         BITMAP.level = await createImageBitmap(CTX.canvas);
         if (world[level].heightData.length !== WL) console.error("Height data incomplete");
         console.warn("MAP", world[level], "BITMAP", BITMAP.level);
+        console.info("PROFILE ACTORS", PROFILE_ACTORS);
         console.timeEnd("drawLevel");
         console.log("************************************  END draw level ************************************");
     },
@@ -387,7 +388,7 @@ const DTP = {
                 break;
         }
 
-        /** spawning, game coorindates! */
+        /** spawning, game coordinates! */
         let ax, ay, sName;
         switch (chunk.enemy) {
             case "tank":
