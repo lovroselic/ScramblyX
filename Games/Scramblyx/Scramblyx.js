@@ -9,11 +9,12 @@
 const DEBUG = {
     CHEAT: false,
     debug: true,
-    invincible: true,
+    invincible: false,
     LEVEL: 1,
     lives: 5,
     show_hdata: false,
     FPS: true,
+    bulletImmune: false
 };
 
 ////////////////////////////////////////////////////
@@ -64,10 +65,11 @@ const INI = {
     TOP_SPRITE_TOLERANCE_OFFSET: 16,
     PLAN_HUNT_TOLERANCE: 64,
     PLANE_SHOOT_INTERVAL: 7,
+    TARGET_OFFSET: 170,
 };
 
 const PRG = {
-    VERSION: "1.03.00",
+    VERSION: "1.03.01",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -117,13 +119,10 @@ const PRG = {
         ENGINE.addBOX("LEVEL", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["level"]);
 
         $("#LEVEL").addClass("hidden");
-
-        //ENGINE.checkIntersection = true;
     },
 
     start() {
         console.log(PRG.NAME + " started.");
-        //$("#startGame").addClass("hidden");
 
         $(document).keypress(function (event) {
             if (event.which === 32 || event.which === 13) {
@@ -131,12 +130,10 @@ const PRG = {
             }
         });
 
-
         PATTERN.fromTexture("GrassTerrain");
         PATTERN.fromTexture("SandTerrain");
         PATTERN.fromTexture("SeaTerrain");
         TITLE.startTitle();
-        //GAME.start();
     }
 };
 
@@ -215,9 +212,9 @@ class GeneralBallisticObject {
         for (let id of ids) {
             let obj = PROFILE_ACTORS.show(id);
             if (obj !== null && obj.checkHit(this)) {
-                console.info(" *************** HIT ***************", "... obj", obj, "this", this);
                 let ballistic = PROFILE_BALLISTIC.show(this.id);
                 if (ballistic) ballistic.explode();
+                if (DEBUG.bulletImmune && obj.id === PLANE.id) continue;        //cheat
                 obj.hit(this.damage);
                 if (obj.id !== PLANE.id) {
                     switch (this.name) {
@@ -332,22 +329,17 @@ class Enemy {
     }
     collisionToActors(map) {
         if (!this.ready) return;
-        //console.log("*****************************");
-        //console.log("checking", this.name, this.id);
-
         let X = Math.max(0, Math.round(this.position.x - this.actor.width / 2));
 
         //console.log("X", X, "GAME.x", GAME.x, "PLANE.x", PLANE.x, "MS", PLANE.moveState.x, "Actor plane", PLANE.actor.x);
         let IA = map.profile_actor_IA;
         let ids = IA.unroll(new Grid(X, 0));
-        //remove self id
         ids.remove(this.id);
-        if (ids.length > 0) console.warn("ids", ids);
+        
         for (let id of ids) {
-            console.warn(" ...id", id);
             let obj = PROFILE_ACTORS.show(id);
             if (obj !== null && obj.checkHit(this)) {
-                console.info(" *************** ACTOR TO ACTOR HIT ***************", "... obj", obj, "this", this);
+                //console.info(" *************** ACTOR TO ACTOR HIT ***************", "... obj", obj, "this", this);
                 let target = PROFILE_ACTORS.show(this.id);
                 if (target) target.crash();
                 obj.crash();
@@ -448,7 +440,6 @@ class Ship extends Enemy {
         PROFILE_BALLISTIC.add(new Ballistic(new FP_Grid(x, y), direction, speed));
         AUDIO.Shoot.play();
         setTimeout(this.reset.bind(this), this.shootingSpeed);
-        //console.warn("ship", this.id, "shooting", this);
     }
 }
 
@@ -480,7 +471,6 @@ class Aeroplane extends Enemy {
         PROFILE_BALLISTIC.add(new Ballistic(FP_Grid.toClass(this.position).add(this.dir, this.actor.width * 0.7), this.dir, speed));
         AUDIO.Shoot.play();
         setTimeout(this.reset.bind(this), this.shootingSpeed);
-        console.warn("plane", this.id, "shooting", this);
     }
     move(lapsedTime) {
         this.adjustPosition();
@@ -494,12 +484,13 @@ class Aeroplane extends Enemy {
 
     }
     hunt(lapsedTime) {
-        if (this.position.x - INI.PLAN_HUNT_TOLERANCE < PLANE.x) {
+        if ((this.position.x - INI.PLAN_HUNT_TOLERANCE < PLANE.x) || PLANE.dead) {
             this.setAngle(0);
             return;
         }
         let timeDelta = lapsedTime / 1000;
-        const directionToHero = FP_Grid.toClass(this.position).direction(new FP_Grid(PLANE.x, PLANE.y));
+        const target = new FP_Grid(PLANE.x, PLANE.y).add(PLANE.getDirection(), RND(Math.round(0.9 * INI.TARGET_OFFSET), Math.round(1.1 * INI.TARGET_OFFSET)));
+        const directionToHero = FP_Grid.toClass(this.position).direction(target);
         let radAngle = directionToHero.radAngleBetweenVectorsSharp(this.dir);
         let degAngle = Math.degrees(radAngle);
         let sign = Math.sign(degAngle);
@@ -508,7 +499,7 @@ class Aeroplane extends Enemy {
         this.dir = this.getDirection();
         if (Math.abs(degAngle) < INI.PLANE_SHOOT_INTERVAL) {
             this.readytoShoot = true;
-        }else this.readytoShoot = false;
+        } else this.readytoShoot = false;
 
         //console.info(this.id, "hunting", "directionToHero", directionToHero, "degAngle", degAngle, "angleAdjustment", angleAdjustment, "this.dir", this.dir, "this.angle", this.angle);
     }
