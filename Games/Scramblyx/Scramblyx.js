@@ -9,7 +9,7 @@
 const DEBUG = {
     CHEAT: false,
     debug: true,
-    invincible: false,
+    invincible: true,
     LEVEL: 1,
     lives: 5,
     show_hdata: false,
@@ -48,30 +48,26 @@ const INI = {
     BULLET_SPEED: 24 * 60, //pix/min 24/frame
     BULLET_TIMEOUT: 180,
     BOMB_TIMEOUT: 680,
-    //BOMB_GRAVITY_SPEED: 12,
-    //ENEMY_PLANES: 11,
-    ENEMY_TANKS: 6,
-    ENEMY_SHIPS: 4,
-
     ZEPPELIN_SCORE: 2500,
     PLANE_SCORE: 1000,
     TANK_SCORE: 500,
     SHIP_SCORE: 750,
-
-    PLANE_SPEED: 13,
+    PLANE_SPEED: 200,
     ZEPPELIN_SPEED: 160,
     PLANE_SHOOT: 1200,
-    SHIP_SHOOT: 600, //1600
+    SHIP_SHOOT: 700, //1600
     SHIP_RANDOM: 300,
     LEVEL_BONUS: 100000,
     LAST_LEVEL: 5,
     ACCELERATION_TO_MAX: 2, // seconds
     LEFT_SPRITE_TOLERANCE_OFFSET: 128,
     TOP_SPRITE_TOLERANCE_OFFSET: 16,
+    PLAN_HUNT_TOLERANCE: 64,
+    PLANE_SHOOT_INTERVAL: 7,
 };
 
 const PRG = {
-    VERSION: "1.02.11",
+    VERSION: "1.03.00",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -94,6 +90,8 @@ const PRG = {
         $("#engine_version").html(ENGINE.VERSION);
         $("#lib_version").html(LIB.VERSION);
         $("#terrain_version").html(TERRAIN.VERSION);
+        $("#grid_version").html(GRID.VERSION);
+        $("#iam_version").html(IndexArrayManagers.VERSION);
 
         $("#toggleHelp").click(function () {
             $("#help").toggle(400);
@@ -320,7 +318,6 @@ class Enemy {
         this.sprite_class = sprite_class;
         this.readyToShoot = false;
         this.gameX = gameX;
-        this.actor = new ACTOR(this.sprite_class);
         this.moveState = new _1D_MoveState(position, 0);
         this.ready = false;
         this.name = sprite_class;
@@ -411,13 +408,13 @@ class Enemy {
     }
     reset() {
         this.canShoot = true;
-        console.log(this, "can shoot again");
     }
 }
 
 class Tank extends Enemy {
     constructor(position, sprite_class) {
         super(position, sprite_class);
+        this.actor = new ACTOR(this.sprite_class);
         this.realLives = 3;
         this.lives = this.realLives;
         this.moves = false;
@@ -430,6 +427,7 @@ class Tank extends Enemy {
 class Ship extends Enemy {
     constructor(position, sprite_class) {
         super(position, sprite_class);
+        this.actor = new ACTOR(this.sprite_class);
         this.realLives = 5;
         this.lives = this.realLives;
         this.moves = false;
@@ -450,25 +448,93 @@ class Ship extends Enemy {
         PROFILE_BALLISTIC.add(new Ballistic(new FP_Grid(x, y), direction, speed));
         AUDIO.Shoot.play();
         setTimeout(this.reset.bind(this), this.shootingSpeed);
-        console.warn("ship", this.id, "shooting", this);
+        //console.warn("ship", this.id, "shooting", this);
     }
 }
 
 class Aeroplane extends Enemy {
     constructor(position, sprite_class) {
         super(position, sprite_class);
+        this.actor = new Rotating_ACTOR(this.sprite_class);
+        this.name = sprite_class;
         this.realLives = 1;
         this.lives = this.realLives;
         this.moves = true;
         this.canShoot = true;
+        this.readytoShoot = false;
         this.hunts = true;
         this.score = INI.PLANE_SCORE;
+        this.shootingSpeed = INI.PLANE_SHOOT
+        this.dir = FP_Vector.toClass(LEFT);
+        this.speed = new FP_Vector(INI.PLANE_SPEED, INI.PLANE_SPEED);
+        this.rotSpeed = 30; //deg/s
+        this.setAngle(0);
+    }
+    shoot() {
+        if (PLANE.dead) return;
+        if (!this.ready) return;
+        if (!this.canShoot) return;
+        if (!this.readytoShoot) return;
+        this.canShoot = false;
+        let speed = new FP_Vector(INI.BULLET_SPEED, INI.BULLET_SPEED);
+        PROFILE_BALLISTIC.add(new Ballistic(FP_Grid.toClass(this.position).add(this.dir, this.actor.width * 0.7), this.dir, speed));
+        AUDIO.Shoot.play();
+        setTimeout(this.reset.bind(this), this.shootingSpeed);
+        console.warn("plane", this.id, "shooting", this);
+    }
+    move(lapsedTime) {
+        this.adjustPosition();
+        if (this.ready) {
+            this.hunt(lapsedTime);
+            let timeDelta = lapsedTime / 1000;
+            this.position = this.position.add(this.speed.mul(this.dir, timeDelta));
+            this.shoot();
+        }
+        this.checkVisibility();
+
+    }
+    hunt(lapsedTime) {
+        if (this.position.x - INI.PLAN_HUNT_TOLERANCE < PLANE.x) {
+            this.setAngle(0);
+            return;
+        }
+        let timeDelta = lapsedTime / 1000;
+        const directionToHero = FP_Grid.toClass(this.position).direction(new FP_Grid(PLANE.x, PLANE.y));
+        let radAngle = directionToHero.radAngleBetweenVectorsSharp(this.dir);
+        let degAngle = Math.degrees(radAngle);
+        let sign = Math.sign(degAngle);
+        let angleAdjustment = sign * timeDelta * this.rotSpeed;
+        this.addAngle(angleAdjustment);
+        this.dir = this.getDirection();
+        if (Math.abs(degAngle) < INI.PLANE_SHOOT_INTERVAL) {
+            this.readytoShoot = true;
+        }else this.readytoShoot = false;
+
+        //console.info(this.id, "hunting", "directionToHero", directionToHero, "degAngle", degAngle, "angleAdjustment", angleAdjustment, "this.dir", this.dir, "this.angle", this.angle);
+    }
+    getDirection() {
+        let angle = new Angle(this.angle);
+        let planeDirection = angle.getDirectionVector(LEFT);
+        planeDirection.y *= -1;                                 //revert to game coordinates
+        return planeDirection;
+    }
+    setAngle(a) {
+        this.angle = Math.max(-30, Math.min(a, 30));
+        this.actor.setAngle(Math.round(this.angle));
+    }
+    addAngle(a) {
+        let A = this.angle + a;
+        this.setAngle(A);
+    }
+    getSprite() {
+        return this.actor.sprite();
     }
 }
 
 class Zeppelin extends Enemy {
     constructor(position, sprite_class) {
         super(position, sprite_class);
+        this.actor = new ACTOR(this.sprite_class);
         this.realLives = 3;
         this.lives = this.realLives;
         this.moves = true;
@@ -575,7 +641,7 @@ const PLANE = {
                 PLANE.angle = 0;
                 PLANE.y = PLANE.ZERO;
                 PLANE.airborne = false;
-                AUDIO.motorRate.stop();
+                AUDIO.PlaneMotor.stop();
             } else PLANE.die();
         }
     },
@@ -595,7 +661,7 @@ const PLANE = {
         if (PLANE.x > INI.PLANE_RIGHT) PLANE.x = INI.PLANE_RIGHT;
     },
     checkHit(another) {
-        console.warn("PLANE. check hit, another", another);
+        //console.warn("PLANE. check hit, another", another);
         return ENGINE.collisionArea(this.actor, another.actor);
     },
     hit() {
@@ -608,6 +674,7 @@ const PLANE = {
     },
     die() {
         console.log("plane dies");
+        if (DEBUG.invincible) return;
         DESTRUCTION_ANIMATION.add(new Explosion(new Grid(PLANE.x, PLANE.y)));
         AUDIO.Explosion.play();
         AUDIO.PlaneMotor.stop();

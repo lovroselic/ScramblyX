@@ -60,6 +60,7 @@ LoadSprites = [
 
 LoadRotated = [
   //planes
+  /*
   { srcName: "Plane1.png", name: "Plane1", rotate: { first: -30, last: 30, step: 1 } },
   { srcName: "Plane10.png", name: "Plane10", rotate: { first: -30, last: 30, step: 1 } },
   { srcName: "Plane11.png", name: "Plane11", rotate: { first: -30, last: 30, step: 1 } },
@@ -71,12 +72,25 @@ LoadRotated = [
   { srcName: "Plane7.png", name: "Plane7", rotate: { first: -30, last: 30, step: 1 } },
   { srcName: "Plane8.png", name: "Plane8", rotate: { first: -30, last: 30, step: 1 } },
   { srcName: "Plane9.png", name: "Plane9", rotate: { first: -30, last: 30, step: 1 } },
+*/
   { srcName: "spitfire64.png", name: "Spitfire", rotate: { first: -30, last: 30, step: 1 } },
 ];
 
 LoadRotatedSheetSequences = [
   //bomb
   { srcName: "bomb1.png", count: 1, name: "Bomb", rotate: { first: 0, last: 90, step: 1 } },
+  //planes
+  { srcName: "Plane1.png", count: 1, name: "Plane1", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane10.png", count: 1, name: "Plane10", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane11.png", count: 1, name: "Plane11", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane2.png", count: 1, name: "Plane2", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane3.png", count: 1, name: "Plane3", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane4.png", count: 1, name: "Plane4", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane5.png", count: 1, name: "Plane5", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane6.png", count: 1, name: "Plane6", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane7.png", count: 1, name: "Plane7", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane8.png", count: 1, name: "Plane8", rotate: { first: -30, last: 30, step: 1 } },
+  { srcName: "Plane9.png", count: 1, name: "Plane9", rotate: { first: -30, last: 30, step: 1 } },
 ];
 
 LoadSheetSequences = [

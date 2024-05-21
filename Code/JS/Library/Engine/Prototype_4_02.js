@@ -620,7 +620,6 @@ class FP_Grid extends MasterGridClass {
     let y = this.y + vector.y * length;
     return new FP_Grid(x, y);
   }
-
   direction(grid) {
     let dx = grid.x - this.x;
     let dy = grid.y - this.y;
@@ -1005,7 +1004,7 @@ class RectArea {
 }
 
 /** kept for compatibility as alias */
-class Area extends  RectArea{
+class Area extends RectArea {
   constructor(x, y, w, h) {
     super(x, y, w, h);
   }
@@ -1027,7 +1026,7 @@ class Angle {
   bounce(face) {
     return new Angle((180 + 2 * face - this.angle) % 360);
   }
-  getDirectionVector(refVector){
+  getDirectionVector(refVector) {
     const angleInRadians = Math.radians(this.angle);
     const cosAngle = Math.cos(angleInRadians);
     const sinAngle = Math.sin(angleInRadians);

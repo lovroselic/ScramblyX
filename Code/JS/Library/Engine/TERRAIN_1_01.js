@@ -256,6 +256,7 @@ const DTP = {
         NPALM: 5,
         NTANK: 6,
         NSHIP: 4,
+        NPLANE: 11,
     },
     async drawLevel(level, world, CTX) {
         console.log("************************************  draw level ************************************");
@@ -408,6 +409,16 @@ const DTP = {
                 ay = chunk.y + Math.floor(SPRITE[sName].height / 2);
                 let ship = new Ship(new Grid(ax, ay), sName);
                 PROFILE_ACTORS.add(ship);
+                break;
+            case "plane":
+                const NPL = chunk.h.length;
+                for (let p = 0; p < NPL; p++) {
+                    sName = `Plane${RND(1, DTP.INI.NPLANE)}`
+                    ax = DTP.x + Math.floor(chunk.w / 2);
+                    ay = chunk.h[p];
+                    let plane = new Aeroplane(new Grid(ax, ay), sName);
+                    PROFILE_ACTORS.add(plane);
+                }
                 break;
             default:
                 break;
