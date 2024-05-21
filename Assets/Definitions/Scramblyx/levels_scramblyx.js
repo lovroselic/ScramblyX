@@ -670,3 +670,4 @@ const MAP = {
     mainPattern: "GrassTerrain"
   }
 };
+console.log("MAP, levels for Scramblyx ready.");

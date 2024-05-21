@@ -1,5 +1,5 @@
 /* assets for ScramblyX */
-console.log("Assets for INVASION starting .....");
+console.log("Assets for Scramblyx starting .....");
 
 LoadFonts = [
   { srcName: "MoriaCitadel.ttf", name: "Moria" },
@@ -85,4 +85,4 @@ LoadSheetSequences = [
   { srcName: "Smoke2.png", count: 12, name: "Smoke" }
 ];
 
-console.log("Assets for INVASION ready.");
+console.log("Assets for Scramblyx ready.");

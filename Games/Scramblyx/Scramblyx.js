@@ -8,13 +8,13 @@
 /////////////debug vars/////////////////////
 const DEBUG = {
     CHEAT: false,
-    debug: true,
+    debug: false,
     invincible: false,
     LEVEL: 1,
     lives: 5,
     show_hdata: false,
-    FPS: true,
-    bulletImmune: true
+    FPS: false,
+    bulletImmune: false
 };
 
 ////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ const INI = {
 };
 
 const PRG = {
-    VERSION: "1.03.02",
+    VERSION: "1.04",
     NAME: "ScramblyX",
     YEAR: "2018",
     CSS: "color: #239AFF;",
@@ -330,8 +330,6 @@ class Enemy {
     collisionToActors(map) {
         if (!this.ready) return;
         let X = Math.max(0, Math.round(this.position.x - this.actor.width / 2));
-
-        //console.log("X", X, "GAME.x", GAME.x, "PLANE.x", PLANE.x, "MS", PLANE.moveState.x, "Actor plane", PLANE.actor.x);
         let IA = map.profile_actor_IA;
         let ids = IA.unroll(new Grid(X, 0));
         ids.remove(this.id);
@@ -339,7 +337,6 @@ class Enemy {
         for (let id of ids) {
             let obj = PROFILE_ACTORS.show(id);
             if (obj !== null && obj.checkHit(this)) {
-                //console.info(" *************** ACTOR TO ACTOR HIT ***************", "... obj", obj, "this", this);
                 let target = PROFILE_ACTORS.show(this.id);
                 if (target) target.crash();
                 obj.crash();
@@ -500,8 +497,6 @@ class Aeroplane extends Enemy {
         if (Math.abs(degAngle) < INI.PLANE_SHOOT_INTERVAL) {
             this.readytoShoot = true;
         } else this.readytoShoot = false;
-
-        //console.info(this.id, "hunting", "directionToHero", directionToHero, "degAngle", degAngle, "angleAdjustment", angleAdjustment, "this.dir", this.dir, "this.angle", this.angle);
     }
     getDirection() {
         let angle = new Angle(this.angle);
@@ -595,7 +590,6 @@ const PLANE = {
         if (PLANE.landed && map[ENGINE.KEY.map.down]) return;
 
         if (PLANE.landed && map[ENGINE.KEY.map.up]) {
-            //console.warn("LIFT OFF");
             PLANE.landed = false;
             PLANE.airborne = true;
             PLANE.y += 2;
@@ -623,7 +617,6 @@ const PLANE = {
         if (PLANE.dead) return;
         const currentX = PLANE.x + GAME.x + Math.round(PLANE.width / 4);
         const planeBottomY = PLANE.y - Math.round(PLANE.height / 4);
-        //const height = MAP[GAME.level].heightData[currentX];
         const height = MAP[GAME.getRealLevel()].heightData[currentX];
         if (planeBottomY <= height) {
             if (PLANE.airborne && PLANE.clearForlanding && PLANE.angle <= 10) {
@@ -660,7 +653,6 @@ const PLANE = {
         PLANE.die();
     },
     die() {
-        //console.log("plane dies");
         if (DEBUG.invincible) return;
         DESTRUCTION_ANIMATION.add(new Explosion(new Grid(PLANE.x, PLANE.y)));
         AUDIO.Explosion.play();
@@ -676,16 +668,15 @@ const PLANE = {
             "Be more carefull.",
             "Your are kind of hopeless.",
             "Your imcompetence makes me cry.",
-            "Are you sure playing games is the right hobby for you?"
+            "Are you sure playing games is the right hobby for you?",
+            "Come on, really? Can't you do better?"
         ];
         SPEECH.use('Princess');
         setTimeout(function () {
             SPEECH.speak(texts.chooseRandom());
         }, 1000);
-        //SPEECH.speak(texts.chooseRandom());
     },
     death() {
-        //console.log("process completed, death, start rewind");
         if (GAME.lives <= 0) return GAME.over();
         GAME.rewind = true;
     },
@@ -726,13 +717,12 @@ const PLANE = {
         PLANE.bombReady = false;
 
         let planeDirection = PLANE.getDirection();
-        planeDirection.y = Math.min(0, planeDirection.y);       //just down
-        let plane = this.getPlane();
-        let bomb = plane.add(planeDirection, PLANE.width * 0.6);
-        bomb.y -= PLANE.height * 0.6;                           //more down
-        let dir = new FP_Vector(1, -1);                         //game coordinates!!
-        let speed = new FP_Vector(INI.MAX_SPEED, 0);            //in pixels per second
-        //console.log("dropping bomb", bomb, speed, dir);
+        planeDirection.y = Math.min(0, planeDirection.y);               //just down
+        let plane = this.getPlane();        
+        let bomb = plane.add(planeDirection, PLANE.width * 0.6);        
+        bomb.y -= PLANE.height * 0.6;                                   //more down
+        let dir = new FP_Vector(1, -1);                                 //game coordinates!!
+        let speed = new FP_Vector(INI.MAX_SPEED, 0);                    //in pixels per second
         PROFILE_BALLISTIC.add(new Bomb(bomb, dir, speed));
         GAME.bombsDroped++;
 
@@ -802,8 +792,8 @@ const GAME = {
         GAME.bombsHit = 0;
         GAME.shotsHit = 0;
 
-        //GAME.level = 1;
-        GAME.level = 13;
+        GAME.level = 1;
+        //GAME.level = 13;
         GAME.lives = 3;
         GAME.score = 0;
         GAME.extraLife = SCORE.extraLife.clone();
@@ -817,7 +807,6 @@ const GAME = {
 
         /****************/
 
-        //GAME.setDrawLevel(GAME.level);
         GAME.fps = new FPS_short_term_measurement(300);
         GAME.ended = false;
         PLANE.firstInit();
@@ -831,9 +820,6 @@ const GAME = {
         console.info(" - start -", GAME.level);
         GAME.prepareForRestart();
         DESTRUCTION_ANIMATION.init(null);
-        /*PROFILE_BALLISTIC.init(MAP[GAME.level]);
-        PROFILE_ACTORS.init(MAP[GAME.level]);
-        GAME.initLevel(GAME.level);*/
         PROFILE_BALLISTIC.init(MAP[GAME.getRealLevel()]);
         PROFILE_ACTORS.init(MAP[GAME.getRealLevel()]);
         GAME.initLevel(GAME.getRealLevel());
@@ -973,13 +959,10 @@ const GAME = {
     },
     nextLevel() {
         GAME.level++;
-        //GAME.setDrawLevel(GAME.level);
         ENGINE.clearLayer("text");
         console.log("Ascending to level ", GAME.level);
-        //PLANE.init();
         PLANE.firstInit();
         GAME.levelStart();
-        //GAME.initLevel(GAME.level);
     },
     async initLevel(level) {
         console.info("init level", level);
@@ -994,7 +977,6 @@ const GAME = {
         PROFILE_ACTORS.clearAll();
         PROFILE_BALLISTIC.clearAll();
         PROFILE_ACTORS.add(PLANE);
-        //console.log("PROFILE_ACTORS", PROFILE_ACTORS);
 
         await DTP.drawLevel(GAME.drawLevel, MAP, LAYER.level);
         if (DEBUG.show_hdata) DTP.debugPaint(GAME.drawLevel, MAP, LAYER.level);
@@ -1007,7 +989,7 @@ const GAME = {
     },
     levelExecute(level) {
         console.log("level", level, "executes");
-        GAME.firstFrameDraw(); //
+        GAME.firstFrameDraw(); 
 
         setTimeout(function () {
             ENGINE.clearLayer("text");
@@ -1029,16 +1011,18 @@ const GAME = {
             "Try not to get hurt.",
             "See those planes? They are out to get you.",
             "At least try to survive",
+            "Kill them all. Or some."
         ];
+
         SPEECH.use('Princess');
         SPEECH.speak(texts.chooseRandom());
     },
     lostFocus() {
-        if (GAME.paused || false) return;
+        if (GAME.paused) return;
         GAME.clickPause();
     },
     clickPause() {
-        if (false || GAME.levelCompleted) return;
+        if (GAME.levelCompleted) return;
         $("#pause").trigger("click");
         ENGINE.GAME.keymap[ENGINE.KEY.map.F4] = false;
     },
@@ -1175,7 +1159,6 @@ const TEXT = {
 };
 const TITLE = {
     startTitle() {
-        console.log("Start title");
         if (AUDIO.Title) TITLE.music();
         TITLE.render();
         BACKGROUND.black();
@@ -1250,7 +1233,6 @@ const TITLE = {
         CTX.fillStyle = grad;
         CTX.fillText(PRG.NAME, x, y);
 
-        //
         CTX.fillStyle = "#EEE";
         CTX.shadowColor = "#CCC";
         CTX.font = "12px Consolas";
